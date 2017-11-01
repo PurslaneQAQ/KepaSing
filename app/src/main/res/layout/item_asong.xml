@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--这个是首页上的 带歌手名的 一首歌布局！！！-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="80dp"
+    android:layout_width="match_parent">
+    <ImageView
+        android:layout_marginLeft="10dp"
+        android:layout_centerVertical="true"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:id="@+id/ItemImage"/>
+    <TextView
+        android:id="@+id/ItemTitle"
+        android:layout_toRightOf="@id/ItemImage"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_alignTop="@id/ItemImage"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:textSize="18sp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ItemTitle"
+        android:layout_alignLeft="@id/ItemTitle"
+        android:textSize="13sp"
+        android:id="@+id/ItemText"/>
+</RelativeLayout>

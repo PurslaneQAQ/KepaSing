@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--排行页面上的一首歌布局（带排行数字）-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="80dp"
+    android:layout_width="match_parent">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/ItemImage"
+        android:layout_marginLeft="10dp"
+        android:textSize="12sp"
+        android:id="@+id/Num"/>
+    <ImageView
+        android:layout_marginLeft="10dp"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@id/Num"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:id="@+id/ItemImage"/>
+
+    <TextView
+        android:id="@+id/ItemTitle"
+        android:layout_toRightOf="@id/ItemImage"
+        android:layout_marginLeft="10dp"
+        android:layout_alignTop="@id/ItemImage"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:textSize="18sp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ItemTitle"
+        android:layout_alignLeft="@id/ItemTitle"
+        android:textSize="13sp"
+        android:id="@+id/ItemText"/>
+</RelativeLayout>
