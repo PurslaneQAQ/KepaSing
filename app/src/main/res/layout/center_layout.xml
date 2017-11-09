@@ -36,26 +36,26 @@
         <de.hdodenhof.circleimageview.CircleImageView
             xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/person"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             app:civ_border_width="2dp"
             app:civ_border_color="@color/colorAccent"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="20dp"/>
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="10dp"/>
         <TextView
             android:id="@+id/nickname"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/person"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="10dp"
+            android:layout_toRightOf="@id/person"
+            android:layout_alignTop="@id/person"
+            android:layout_marginLeft="10dp"
             android:textSize="20dp"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/emailaddress"
             android:layout_below="@id/nickname"
-            android:layout_centerHorizontal="true"
+            android:layout_alignLeft="@id/nickname"
             android:layout_marginTop="5dp"
             android:textSize="15dp"
             android:textColor="@color/CommonGray"/>
@@ -108,7 +108,6 @@
             android:layout_above="@id/player"
             android:layout_below="@id/emailaddress"
             android:layout_marginTop="20dp"
-            android:layout_marginBottom="1dp"
             android:orientation="vertical"
             android:background="@color/White">
         <TextView
@@ -123,26 +122,20 @@
                 android:layout_width="match_parent"
                 android:layout_height="0.5dp"
                 android:background="#90909090" />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_below="@id/myKB"
-            android:id="@+id/mywork"
-            android:text="我的作品"
-            android:layout_marginTop="2dp"
-            android:paddingTop="10dp"
-            android:paddingLeft="15dp" />
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/mysongs">
-            <LinearLayout
+            <android.support.design.widget.TabLayout
+                android:id="@+id/sliding_tabs"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/mysongs_container"
-                android:orientation="horizontal">
-            </LinearLayout>
-        </HorizontalScrollView>
+                android:layout_height="40dp"
+                android:background="@color/White"
+                style="@style/centerpage_customtablayout"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="#90909090" />
+            <android.support.v4.view.ViewPager
+                android:id="@+id/viewpager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
         </LinearLayout>
 
         <!--这只是播放器和“作品”之间的分隔线-->

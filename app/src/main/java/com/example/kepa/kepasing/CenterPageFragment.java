@@ -1,37 +1,40 @@
 package com.example.kepa.kepasing;
 
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.res.AssetManager;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapShader;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.RectF;
-import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.view.Gravity;
+import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.text.ParseException;
 
-import static android.R.attr.layout_centerHorizontal;
+import static com.example.kepa.kepasing.MainActivity.UserID;
+import static com.example.kepa.kepasing.MainActivity.client;
 
 /**
  * Created by Administrator on 2017/10/25 0025.
@@ -41,25 +44,27 @@ public class CenterPageFragment extends Fragment {
 
     public static final String ARG_PAGE = "ARG_PAGE";
     private int mPage;
-    String[] mysongimages=null;
-    AssetManager mysongimageAsset=null;
-    public MediaPlayer mMediaPlayer= null;
+    private CenterAdapter pageAdapter;
+    private ViewPager viewPager;
+    private TabLayout tabLayout;
+
+    //public static File[] mysongimages=null;
+    public static MediaPlayer mMediaPlayer= null;
 
     //存放歌名和得分
-    String[] songnames=new String[]{
-            "Born To Die","Rolling In the Deep","Innocence","Toxic","Grenade","Read All About It",
-            "Love the Way You Lie","My Songs Know What You Did In the Dark","Castle"
-    };
-    String[] scores=new String[]{
-            "5.0","1.2","3.8","6.7","9.8","6.4","7.2",
-            "6.5","8.1"
-    };
 
     private ImageView last;
     private ImageView play;
     private ImageView next;
+    private ContentResolver resolver;
+    public static String email;
+    public static String nickname;
+    public static String password;
+    private String FromServer;
+    private SeekBar progress;
     private TextView onplaysongname;
     private PopupWindow mykebpage;
+    private String kbNum;
 
     public static CenterPageFragment newInstance() {
         Bundle args = new Bundle();
@@ -72,16 +77,17 @@ public class CenterPageFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPage = getArguments().getInt(ARG_PAGE);
-        try {
+        new Thread(runnable).start();
+        /*try {
             mysongimageAsset=getContext().getAssets();
             mysongimages=mysongimageAsset.list("");
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
         //我的Ke币 弹窗界面设置
         View mykebpop=getLayoutInflater(savedInstanceState).inflate(R.layout.mykb,null);
         TextView mykbnum=(TextView)mykebpop.findViewById(R.id.numberofKB);
-        mykbnum.setText("5000");
+        mykbnum.setText(kbNum);
         Button chongzhi=(Button)mykebpop.findViewById(R.id.chongzhi);
         chongzhi.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,35 +101,130 @@ public class CenterPageFragment extends Fragment {
         mykebpage.setOutsideTouchable(true);
         mykebpage.setBackgroundDrawable(new BitmapDrawable(getResources(),(Bitmap)null));
     }
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            Log.i("client", "wozhendeyaojinqule");
+            client = new Client();
+            try {
+                FromServer = client.sendString(BuildJson(false));
+                File directory = new File(getContext().getFilesDir() + "/user/img/");
+                if (!directory.exists())
+                    directory.getParentFile().mkdirs();
+                FromServer = client.getFile(BuildJson(true) ,directory.toString());
+                Log.i("client", FromServer);
+                if (!ParseJson(FromServer)) {
+                    //
+                }
+            } catch (JSONException e) {
+                System.out.println("build json failed");
+                e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+            //FileTransferClient upload  = new FileTransferClient(recentTouxiang);
+        }
+    };
+
+    private String BuildJson(boolean portrait) throws JSONException {
+
+        JSONObject inf;
+        inf = new JSONObject();
+
+        try {
+            //inf.put("number", );
+            JSONArray array = new JSONArray();
+            JSONObject arr2 = new JSONObject();
+            if(portrait)
+                arr2.put("type", "portrait");
+            else
+                arr2.put("type", "mime");
+            arr2.put("user_ID", UserID);
+            System.out.println(arr2.toString());
+            array.put(arr2);
+            inf.put("kepa", array);
+            System.out.println(array.toString());
+            System.out.println(inf.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        System.out.println("\n最终构造的JSON数据格式：");
+        System.out.println(inf.toString());
+
+        return inf.toString();
+    }
+    public boolean ParseJson(String jsonString) throws JSONException,
+            java.text.ParseException {
+
+        JSONObject jo = new JSONObject(jsonString);
+        JSONArray ja = jo.getJSONArray("kepa");
+
+        System.out.println("\n将Json数据解析为Map：");
+        System.out.println("type: " +
+                "" + ja.getJSONObject(0).getString("type"));
+
+        if (ja.getJSONObject(0).getString("type").equals("mime")) {
+            nickname = ja.getJSONObject(0).getString("nick");
+            email = ja.getJSONObject(0).getString("username");
+            kbNum = ja.getJSONObject(0).getString("money");
+            return true;
+        }
+        //Toast.makeText(getActivity().getApplicationContext(), "页面加载失败QwQ", Toast.LENGTH_SHORT).show();
+        return false;
+    }
+
     /*页面布局设置*/
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.center_layout, container, false);
         ImageView icon=(ImageView)view.findViewById(R.id.person);//头像 到时候从服务器上取
-        icon.setImageResource(R.drawable.touxiang);
+        resolver = getActivity().getApplicationContext().getContentResolver();
+        while(nickname ==null){}
+        File portrait = new File(getContext().getFilesDir()+ "/user/img/" + UserID + ".jpg");
+        try {
+            Bitmap bm = MediaStore.Images.Media.getBitmap(resolver, Uri.fromFile(portrait));
+            icon.setImageBitmap(bm);
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        TextView nickname=(TextView)view.findViewById(R.id.nickname);
-        nickname.setText("Chaine");//昵称 也从服务器上取
+        TextView nickname_Label=(TextView)view.findViewById(R.id.nickname);
+        nickname_Label.setText(nickname);//昵称 也从服务器上取
 
         TextView emailaddr=(TextView)view.findViewById(R.id.emailaddress);
-        emailaddr.setText("464848541@qq.com");//邮箱地址 服务器上取
+        emailaddr.setText(email);//邮箱地址 服务器上取
 
-        //“我的作品”部分
-        LinearLayout mysongs=(LinearLayout)view.findViewById(R.id.mysongs_container);
-        for(int i=0;i<9;i++){
-            mysongs.addView(addMysongs(view,i));
-        }
-        //下面是页面底部的播放器 需要给按钮设定功能 还要绑定“我的作品”里的歌与播放器
+        //“我的作品”部分 歌曲item点击事件在mysongsfragment里设置
+        pageAdapter = new CenterAdapter(getChildFragmentManager(), view.getContext());
+        viewPager = (ViewPager)view.findViewById(R.id.viewpager);
+        viewPager.setAdapter(pageAdapter);
+        tabLayout = (TabLayout)view.findViewById(R.id.sliding_tabs);
+        tabLayout.setupWithViewPager(viewPager);
+        tabLayout.setTabMode(TabLayout.MODE_FIXED);
+
+        //下面是页面底部的播放器 需要给按钮设定功能 绑定进度条 还要绑定“我的作品”和“本地作品”里的歌与播放器
         last=(ImageView)view.findViewById(R.id.btn_last);
+        last.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {}});
         play=(ImageView)view.findViewById(R.id.btn_play);
+        play.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {mMediaPlayer.start();
+            }});
         next=(ImageView)view.findViewById(R.id.btn_next);
+        progress=(SeekBar)view.findViewById(R.id.seekbar);//进度条
+
         last.setImageResource(R.drawable.last);
         play.setImageResource(R.drawable.pause);
         next.setImageResource(R.drawable.next);
         onplaysongname=(TextView)view.findViewById(R.id.songname);
-        //正在播放的歌名先设一个看看样子
-        onplaysongname.setText("Born To Die");
+        //正在播放的歌名
+        onplaysongname.setText("无正在播放歌曲");
 
         //右上角的编辑按钮
         TextView profile=(TextView)view.findViewById(R.id.profileedit);
@@ -146,43 +247,4 @@ public class CenterPageFragment extends Fragment {
         return view;
     }
 
-    private View addMysongs(View view,int i){
-        LinearLayout asong=new LinearLayout(view.getContext());
-        ImageView mysongpic=new ImageView(view.getContext());
-        TextView mysongname=new TextView(view.getContext());
-        TextView mysongscore=new TextView(view.getContext());
-        asong.setOrientation(LinearLayout.VERTICAL);
-        mysongname.setTextSize(15);
-        mysongscore.setTextSize(12);
-        mysongscore.setTextColor(Color.parseColor("#FF7073"));
-
-        InputStream assetFile=null;
-        try{
-            assetFile=mysongimageAsset.open(mysongimages[i]);
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-        mysongpic.setImageBitmap(BitmapFactory.decodeStream(assetFile));//歌曲图片 从服务器上取
-        LinearLayout.LayoutParams asongparam=new LinearLayout.LayoutParams(350,LinearLayout.LayoutParams.MATCH_PARENT);
-        asongparam.leftMargin=10;
-        asong.setLayoutParams(asongparam);
-
-
-        LinearLayout.LayoutParams songpicparam=new LinearLayout.LayoutParams(340,340);
-        mysongpic.setLayoutParams(songpicparam);
-
-        LinearLayout.LayoutParams songnameparam=new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
-        mysongname.setLayoutParams(songnameparam);
-
-        LinearLayout.LayoutParams scoreparam=new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT,LinearLayout.LayoutParams.WRAP_CONTENT);
-        mysongscore.setLayoutParams(scoreparam);
-
-        mysongname.setText(songnames[i]);
-        mysongscore.setText("得分："+scores[i]);
-
-        asong.addView(mysongpic);
-        asong.addView(mysongname);
-        asong.addView(mysongscore);
-        return asong;
-    }
 }

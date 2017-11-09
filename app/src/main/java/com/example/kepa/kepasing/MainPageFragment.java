@@ -1,13 +1,26 @@
 package com.example.kepa.kepasing;
 
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.text.ParseException;
+
+import static com.example.kepa.kepasing.MainActivity.UserID;
+import static com.example.kepa.kepasing.MainActivity.client;
 
 /**
  * Created by Administrator on 2017/10/25 0025.
@@ -26,6 +39,7 @@ public class MainPageFragment extends Fragment {
         pageFragment.setArguments(args);
         return pageFragment;
     }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

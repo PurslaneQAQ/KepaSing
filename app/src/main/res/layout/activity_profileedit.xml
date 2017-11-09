@@ -41,63 +41,69 @@
             android:layout_gravity="center"
             android:layout_marginTop="20dp"/>
 
-        <LinearLayout
+        <RelativeLayout
+            android:id="@+id/nicknamespace"
             android:layout_width="300dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="80dp"
+            android:layout_height="60dp"
             android:layout_gravity="center"
             android:gravity="center"
-            android:background="@drawable/login_linearlayout">
-
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:layout_marginTop="40dp">
             <TextView
+                android:id="@+id/nickname_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="2dp"
                 android:text="昵 称"
-                android:textSize="15dp"/>
+                android:textSize="12dp"/>
 
             <EditText
-                android:id="@+id/email"
-                android:layout_width="200dp"
+                android:id="@+id/nickname"
+                android:layout_below="@id/nickname_label"
+                android:layout_width="300dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
-                android:background="@null"
                 android:ems="10"
-                android:textSize="16dp" />
-        </LinearLayout>
+                android:textSize="15dp"
+                android:theme="@style/login_underline"
+                android:layout_marginTop="5dp" />
+        </RelativeLayout>
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="300dp"
-            android:layout_height="40dp"
+            android:layout_height="60dp"
             android:layout_gravity="center"
             android:gravity="center"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/login_linearlayout">
-
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:layout_marginTop="10dp">
             <TextView
+                android:id="@+id/pass_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="2dp"
                 android:text="密 码"
-                android:textSize="15dp"/>
+                android:textSize="12dp"/>
 
             <EditText
                 android:id="@+id/password"
-                android:layout_width="200dp"
+                android:layout_below="@id/pass_label"
+                android:layout_width="300dp"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="20dp"
                 android:ems="10"
-                android:textSize="16dp"
-                android:background="@null"
+                android:textSize="15dp"
+                android:theme="@style/login_underline"
+                android:layout_marginTop="5dp"
                 android:inputType="textPassword" />
-        </LinearLayout>
+        </RelativeLayout>
 
         <Button
             android:id="@+id/saveprofile"
-            android:layout_width="100dp"
+            android:layout_width="300dp"
             android:layout_height="35dp"
             android:text="保 存"
             android:textSize="13dp"
-            android:textColor="#434343"
+            android:textColor="@color/White"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="40dp"
             android:background="@drawable/signupbuttonstyle"/>

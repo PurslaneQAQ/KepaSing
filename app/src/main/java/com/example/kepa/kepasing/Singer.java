@@ -1,5 +1,11 @@
 package com.example.kepa.kepasing;
 
+import android.content.Intent;
+import android.util.Log;
+
+import org.json.JSONException;
+
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +29,7 @@ public class Singer {
     public String getName() {
         return name;
     }
-    public static List<Singer> getSingers() {
+    /*public static List<Singer> getSingers() {
         List<Singer> singers = new ArrayList<>();
         singers.add(new Singer("A", "Avril Lavigne"));
         singers.add(new Singer("B", "B.O.B"));
@@ -47,5 +53,5 @@ public class Singer {
         singers.add(new Singer("Y", "杨宗纬"));
         singers.add(new Singer("Z", "张杰"));
         return singers;
-    }
+    }*/
 }

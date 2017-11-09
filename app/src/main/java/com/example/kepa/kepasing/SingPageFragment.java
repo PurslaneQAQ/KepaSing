@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -13,8 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
@@ -31,6 +30,7 @@ public class SingPageFragment extends Fragment {
 
     public static final String ARG_PAGE = "ARG_PAGE";
     private int mPage;
+    private SearchView sv;
     String[] hotsongimages=null;
     AssetManager hotsongimageAsset=null;
 
@@ -55,6 +55,7 @@ public class SingPageFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPage = getArguments().getInt(ARG_PAGE);
+
         try {
             hotsongimageAsset=getContext().getAssets();
             hotsongimages=hotsongimageAsset.list("");
@@ -68,6 +69,26 @@ public class SingPageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.sing_layout, container, false);
         ListView lv=(ListView) view.findViewById(R.id.songs_container);
+        sv=(SearchView)view.findViewById(R.id.search_bar);
+        sv.setIconifiedByDefault(false);
+        sv.setSubmitButtonEnabled(true);
+
+        sv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {//搜索框提交事件监听
+                //final ArrayList<String> keywords=new ArrayList<String>();
+                //keywords.add(query);
+                sv.clearFocus();
+                Intent intent=new Intent(getContext(),searchresult.class);
+                //intent.putStringArrayListExtra("SearchKeywords",keywords);
+                startActivity(intent);
+                return false;
+            }
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
         ArrayList<HashMap<String,Object>>listItem=new ArrayList<HashMap<String, Object>>();
         //加热门歌
         for(int i=0;i<9;i++){
@@ -139,5 +160,12 @@ public class SingPageFragment extends Fragment {
             e.printStackTrace();
         }
         return mBitmap;
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        sv.setQuery("", false);
+        sv.setSubmitButtonEnabled(true);
+        getView().requestFocus();
     }
 }

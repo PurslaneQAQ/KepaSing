@@ -16,5 +16,18 @@
         <item name="android:textSize">18dp</item>
         <item name="android:textColor">@color/White</item>
     </style>
+    <style name="login_underline" parent="Theme.AppCompat.Light">
+        <item name="colorControlNormal">@color/LightGray</item>
+        <item name="colorControlActivated">@color/CommonGray</item>
+    </style>
+    <style name="centerpage_customtablayout" parent="Widget.Design.TabLayout">
+        <item name="tabSelectedTextColor">@color/CommonGray</item>
+        <item name="tabIndicatorColor">@color/colorAccent</item>
+        <item name="tabTextAppearance">@style/centerpage_customtablayouttext</item>
+    </style>
+    <style name="centerpage_customtablayouttext" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">15dp</item>
+        <item name="android:textColor">@color/CommonGray</item>
+    </style>
 
 </resources>

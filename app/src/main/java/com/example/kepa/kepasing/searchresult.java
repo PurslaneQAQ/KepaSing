@@ -4,12 +4,9 @@ import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -21,60 +18,47 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-/**
- * Created by Administrator on 2017/10/25 0025.
- */
-
-public class ScorePageFragment extends Fragment {
-
-    public static final String ARG_PAGE = "ARG_PAGE";
-    private int mPage;
-    String[] scoresongimages=null;
-    AssetManager scoresongimageAsset=null;
-
-    //存放歌名和用户名
+public class searchresult extends AppCompatActivity {
     String[] songnames=new String[]{
             "Born To Die","Rolling In the Deep","Innocence","Toxic","Grenade","Read All About It",
             "Love the Way You Lie","My Songs Know What You Did In the Dark","Castle"
     };
     String[] singername=new String[]{
-            "大大","小小","长长","短短","前前","后后","左左",
-            "右右","下下"
+            "Lana Del Rey","Adele","Avril Lavigne","Britney Spears","Bruno Mars","Emeli Sandé","Eminem ft. Rihanna",
+            "Fall Out Boy","Halsey"
     };
 
-    public static ScorePageFragment newInstance() {
-        Bundle args = new Bundle();
-        ScorePageFragment pageFragment = new ScorePageFragment();
-        pageFragment.setArguments(args);
-        return pageFragment;
-    }
+    String[] songimages=null;
+    AssetManager songimageAsset=null;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPage = getArguments().getInt(ARG_PAGE);
+        setContentView(R.layout.activity_searchresult);
+        ImageView gobackbtn=(ImageView)findViewById(R.id.gobackbutton);
+        gobackbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+
         try {
-            scoresongimageAsset=getContext().getAssets();
-            scoresongimages=scoresongimageAsset.list("");
+            songimageAsset=getAssets();
+            songimages=songimageAsset.list("");
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.score_layout, container, false);
-        ListView lv=(ListView) view.findViewById(R.id.songs_container);
+        //填充搜索结果表单
+        ListView lv=(ListView)findViewById(R.id.search_result);
         ArrayList<HashMap<String,Object>>listItem=new ArrayList<HashMap<String, Object>>();
-
         for(int i=0;i<9;i++){
             HashMap<String,Object> map=new HashMap<String,Object>();
             map.put("ItemImage",getBitmap(i));
             map.put("ItemTitle",songnames[i]);
             map.put("ItemText",singername[i]);
             listItem.add(map);
-            SimpleAdapter simpleAdapter=new SimpleAdapter(getContext(),listItem,R.layout.item_asong,
+            SimpleAdapter simpleAdapter=new SimpleAdapter(this,listItem,R.layout.item_asong,
                     new String[]{"ItemImage","ItemTitle","ItemText"},new int[]{R.id.ItemImage,R.id.ItemTitle,R.id.ItemText});
             simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
                 @Override
@@ -94,20 +78,15 @@ public class ScorePageFragment extends Fragment {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     TextView tv=(TextView)view.findViewById(R.id.ItemTitle);
-                    TextView tv1=(TextView)view.findViewById(R.id.ItemText);
-                    final ArrayList<String> songinfo=new ArrayList<String>();
-                    songinfo.add(tv.getText().toString());
-                    songinfo.add(tv1.getText().toString());
-                    Intent intent=new Intent(parent.getContext(),scoreasong.class);
-                    intent.putStringArrayListExtra("Songinfos",songinfo);
+                    final ArrayList<String> songname=new ArrayList<String>();
+                    songname.add(tv.getText().toString());
+                    Intent intent=new Intent(parent.getContext(),singasong.class);
+                    intent.putStringArrayListExtra("Songinfos",songname);
                     startActivity(intent);
                 }
             });
         }
-        return view;
-    }
-
-    //图片转bitmap
+    }//图片转bitmap
     public Bitmap getBitmap(int i){
         Bitmap mBitmap = null;
         InputStream assetFile=null;
@@ -115,8 +94,8 @@ public class ScorePageFragment extends Fragment {
           HttpURLConnection conn = (HttpURLConnection) url.openConnection();
           InputStream is = conn.getInputStream();   */
         try{
-            assetFile=scoresongimageAsset.open(scoresongimages[i]);
-            mBitmap=BitmapFactory.decodeStream(assetFile);//如果是URL就decodestream(is),并删去上面那句
+            assetFile=songimageAsset.open(songimages[i]);
+            mBitmap= BitmapFactory.decodeStream(assetFile);//如果是URL就decodestream(is),并删去上面那句
         }catch (IOException e){
             e.printStackTrace();
         }

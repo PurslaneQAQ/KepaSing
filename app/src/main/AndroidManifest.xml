@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.kepa.kepasing">
-
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>  
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -22,8 +23,9 @@
         <activity android:name=".profileedit" />
         <activity android:name=".choosesinger" />
         <activity android:name=".havesongs" />
-        <activity android:name=".qingchang" />
-        <activity android:name=".asingerssong"></activity>
+        <activity android:name=".asingerssong" />
+        <activity android:name=".signup" />
+        <activity android:name=".searchresult"/>
     </application>
 
 </manifest>

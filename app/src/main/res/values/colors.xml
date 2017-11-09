@@ -5,4 +5,5 @@
     <color name="colorAccent">#FF7073</color>
     <color name="CommonGray">#7C8489</color>
     <color name="White">#FFFFFF</color>
+    <color name="LightGray">#CCCCCC</color>
 </resources>
