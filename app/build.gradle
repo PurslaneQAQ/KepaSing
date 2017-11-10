@@ -38,4 +38,5 @@ dependencies {
 
     //浏览相册
     compile 'com.jph.takephoto:takephoto_library:4.0.3'
+
 }

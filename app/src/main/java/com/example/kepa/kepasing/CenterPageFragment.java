@@ -32,6 +32,8 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.example.kepa.kepasing.MainActivity.UserID;
 import static com.example.kepa.kepasing.MainActivity.client;
@@ -50,6 +52,13 @@ public class CenterPageFragment extends Fragment {
 
     //public static File[] mysongimages=null;
     public static MediaPlayer mMediaPlayer= null;
+    private boolean play_music = false;
+
+    public static Timer mTimer;
+    public static TimerTask mTask;
+    public static SeekBar progressbar;
+    public static int mPlayTimeDuration = 1000;//更新时间间隔
+
 
     //存放歌名和得分
 
@@ -59,10 +68,9 @@ public class CenterPageFragment extends Fragment {
     private ContentResolver resolver;
     public static String email;
     public static String nickname;
-    public static String password;
     private String FromServer;
     private SeekBar progress;
-    private TextView onplaysongname;
+    public static TextView onplaysongname;
     private PopupWindow mykebpage;
     private String kbNum;
 
@@ -87,6 +95,7 @@ public class CenterPageFragment extends Fragment {
         //我的Ke币 弹窗界面设置
         View mykebpop=getLayoutInflater(savedInstanceState).inflate(R.layout.mykb,null);
         TextView mykbnum=(TextView)mykebpop.findViewById(R.id.numberofKB);
+        while(kbNum == null){}
         mykbnum.setText(kbNum);
         Button chongzhi=(Button)mykebpop.findViewById(R.id.chongzhi);
         chongzhi.setOnClickListener(new View.OnClickListener() {
@@ -100,6 +109,7 @@ public class CenterPageFragment extends Fragment {
         mykebpage.setTouchable(true);
         mykebpage.setOutsideTouchable(true);
         mykebpage.setBackgroundDrawable(new BitmapDrawable(getResources(),(Bitmap)null));
+
     }
     Runnable runnable = new Runnable() {
         @Override
@@ -108,7 +118,7 @@ public class CenterPageFragment extends Fragment {
             client = new Client();
             try {
                 FromServer = client.sendString(BuildJson(false));
-                File directory = new File(getContext().getFilesDir() + "/user/img/");
+                File directory = new File(getContext().getExternalFilesDir("img") + "/user/");
                 if (!directory.exists())
                     directory.getParentFile().mkdirs();
                 FromServer = client.getFile(BuildJson(true) ,directory.toString());
@@ -166,7 +176,7 @@ public class CenterPageFragment extends Fragment {
                 "" + ja.getJSONObject(0).getString("type"));
 
         if (ja.getJSONObject(0).getString("type").equals("mime")) {
-            nickname = ja.getJSONObject(0).getString("nick");
+            nickname = ja.getJSONObject(0).getString("nickname");
             email = ja.getJSONObject(0).getString("username");
             kbNum = ja.getJSONObject(0).getString("money");
             return true;
@@ -184,7 +194,7 @@ public class CenterPageFragment extends Fragment {
         ImageView icon=(ImageView)view.findViewById(R.id.person);//头像 到时候从服务器上取
         resolver = getActivity().getApplicationContext().getContentResolver();
         while(nickname ==null){}
-        File portrait = new File(getContext().getFilesDir()+ "/user/img/" + UserID + ".jpg");
+        File portrait = new File(getContext().getExternalFilesDir("img")+ "/user/" + UserID + ".jpg");
         try {
             Bitmap bm = MediaStore.Images.Media.getBitmap(resolver, Uri.fromFile(portrait));
             icon.setImageBitmap(bm);
@@ -207,6 +217,26 @@ public class CenterPageFragment extends Fragment {
         tabLayout.setTabMode(TabLayout.MODE_FIXED);
 
         //下面是页面底部的播放器 需要给按钮设定功能 绑定进度条 还要绑定“我的作品”和“本地作品”里的歌与播放器
+        progressbar=(SeekBar)view.findViewById(R.id.seekbar);
+        progressbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(mMediaPlayer!=null && fromUser){
+                    mMediaPlayer.seekTo(progress*1000);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
         last=(ImageView)view.findViewById(R.id.btn_last);
         last.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -217,7 +247,6 @@ public class CenterPageFragment extends Fragment {
             public void onClick(View v) {mMediaPlayer.start();
             }});
         next=(ImageView)view.findViewById(R.id.btn_next);
-        progress=(SeekBar)view.findViewById(R.id.seekbar);//进度条
 
         last.setImageResource(R.drawable.last);
         play.setImageResource(R.drawable.pause);
@@ -245,6 +274,40 @@ public class CenterPageFragment extends Fragment {
             }
         });
         return view;
+    }
+    class SeekBarUpdate extends TimerTask {
+        @Override
+        public void run(){
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                if(mMediaPlayer!=null) {
+                    int timePassed = mMediaPlayer.getCurrentPosition() / 1000;
+                    progressbar.setMax(mMediaPlayer.getDuration() / 1000);
+                    progressbar.setProgress(timePassed);
+                    System.out.println("update Seek Bar");
+                }
+                }
+            });
+        }
+    }
+
+    //player
+    public static void stopSeekBar(){
+        if(mTimer!=null){
+            mTimer.cancel();
+            mTimer = null;
+        }
+    }
+
+    //player
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        if(mMediaPlayer!=null){
+            mMediaPlayer.stop();
+        }
+        stopSeekBar();
     }
 
 }

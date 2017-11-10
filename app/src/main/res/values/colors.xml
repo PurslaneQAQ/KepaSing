@@ -6,4 +6,6 @@
     <color name="CommonGray">#7C8489</color>
     <color name="White">#FFFFFF</color>
     <color name="LightGray">#CCCCCC</color>
+    <color name = "colorSpringOrange">#F5B977</color>
+    <color name = "colorSpringYellow">#FDFC7F</color>
 </resources>

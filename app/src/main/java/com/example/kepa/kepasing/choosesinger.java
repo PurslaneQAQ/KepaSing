@@ -6,9 +6,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
-
 import com.gjiazhe.wavesidebar.WaveSideBar;
-
 import java.util.ArrayList;
 
 public class choosesinger extends AppCompatActivity {
@@ -68,7 +66,7 @@ public class choosesinger extends AppCompatActivity {
     }
 
     private void initData() {
-        //singers.addAll(Singer.getSingers());
+        singers.addAll(Singer.getSingers());
     }
 
 }

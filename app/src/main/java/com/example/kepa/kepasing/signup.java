@@ -1,11 +1,11 @@
 package com.example.kepa.kepasing;
 
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import com.jph.takephoto.app.TakePhoto;
 import com.jph.takephoto.app.TakePhotoActivity;
+import com.jph.takephoto.compress.CompressConfig;
 import com.jph.takephoto.model.CropOptions;
 import com.jph.takephoto.model.TResult;
 
@@ -31,6 +32,7 @@ import java.io.IOException;
 
 import static com.example.kepa.kepasing.MainActivity.UserID;
 import static com.example.kepa.kepasing.MainActivity.client;
+import static com.example.kepa.kepasing.MainActivity.password;
 
 public class signup extends TakePhotoActivity {
     //private Client client;
@@ -40,13 +42,14 @@ public class signup extends TakePhotoActivity {
     private ImageView addicon;
     private String email;
     private EditText email_label;
-    private String password;
     private EditText password_label;
     private String nickname;
     private EditText nickname_label;
-    private Uri imageUri;
+    private Uri imageUri = null;
     private TakePhoto takePhoto;
     private File recentTouxiang;
+
+    private String result;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +58,7 @@ public class signup extends TakePhotoActivity {
         email_label = (EditText) findViewById(R.id.email);
         password_label = (EditText) findViewById(R.id.password);
         nickname_label = (EditText) findViewById(R.id.nickname);
-        recentTouxiang = new File(getCacheDir() +  "/user/img/" + "abc" + ".jpg");//abc should be replaced by userID
+        recentTouxiang = new File(getExternalCacheDir() +  "/img/" + "user" + ".png");//abc should be replaced by userID
 
         ImageView gobackbtn = (ImageView) findViewById(R.id.gobackbutton);
         gobackbtn.setOnClickListener(new View.OnClickListener() {
@@ -74,22 +77,25 @@ public class signup extends TakePhotoActivity {
                 @Override
                 public void run() {
                     Log.i("client", "wozhendeyaojinqule");
-                    client = new Client();
                     try {
                         FromServer = client.sendString(BuildJson());
                         Log.i("client", FromServer);
                         UserID = ParseJson(FromServer);
                         Log.i("client", UserID);
                         if (UserID != null) {
-                            //File Touxiang = new File(Environment.getExternalStorageDirectory(), "/user/img/"+ UserID + ".jpg");
-                            File Touxiang = new File(getFilesDir() +"/img/"+ UserID + ".jpg");
+                            File Touxiang = new File(getExternalFilesDir("img") + "/user/" + UserID + ".png");
+                            if(!Touxiang.getParentFile().exists()){
+                                Touxiang.getParentFile().mkdir();
+                            }
                             if(recentTouxiang.exists()){
                                 recentTouxiang.renameTo(Touxiang);
+                                System.out.println("I beg you come in");
+                                imgWatermark wm = new imgWatermark();
+                                wm.watermarkBitmap(recentTouxiang.toString(), getResources());
                                 client.sendFile(Touxiang.toString());
-
-                                Intent intent = new Intent(signup.this, mainpage.class);
-                                startActivity(intent);
                             }
+                            Intent intent = new Intent(signup.this, mainpage.class);
+                            startActivity(intent);
                         }
                     } catch (JSONException e) {
                         System.out.println("build json failed");
@@ -103,14 +109,13 @@ public class signup extends TakePhotoActivity {
                 }
             };
 
-
-
             @Override
             public void onClick(View v) {
                 email = email_label.getText().toString();
                 nickname = nickname_label.getText().toString();
                 password = password_label.getText().toString();
-                if (email.length() < 5 || email.indexOf("@")<=0 || email.indexOf(".") <=0) {
+                //if (email.length() < 5 || email.indexOf("@")<=0 || email.indexOf(".") <=0) {
+                if (email.length() < 5 || email.indexOf(".") <=0) {
                     Toast.makeText(signup.this, "请输入正确的邮箱！", Toast.LENGTH_SHORT).show();
                 }
                 else if (nickname.length()  < 1) {
@@ -119,16 +124,27 @@ public class signup extends TakePhotoActivity {
                 else if (password.length() < 6) {
                     Toast.makeText(signup.this, "江湖危险，请设置更长一点的密码哟！", Toast.LENGTH_SHORT).show();
                 }
+                else if (password.length()> 12) {
+                    Toast.makeText(signup.this, "服务器表示这么长的密码我记不住啦！", Toast.LENGTH_SHORT).show();
+                }
                 else {
                     new Thread(runnable).start();
-                    Toast.makeText(signup.this, "注册成功！奇葩君欢迎你的加入(●ˇ∀ˇ●)", Toast.LENGTH_SHORT).show();
+                    while (result == null){}
+                    if(result.equals("true")){
+                        Toast.makeText(signup.this, "注册成功！奇葩君欢迎你的加入(●ˇ∀ˇ●)", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(v.getContext(), mainpage.class);
+                        startActivity(intent);
+                    }
+                    else {
+                        Toast.makeText(signup.this, "已经用这个账号注册过了哟！", Toast.LENGTH_SHORT).show();
+                    }
 
                     /******************for_try***********************
-                    SaveUserInfor();
-                    Toast.makeText(signup.this, "注册成功！奇葩君欢迎你的加入(●ˇ∀ˇ●)", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(v.getContext(), mainpage.class);
-                    startActivity(intent);
-                    *************************************************/
+
+                     Toast.makeText(signup.this, "注册成功！奇葩君欢迎你的加入(●ˇ∀ˇ●)", Toast.LENGTH_SHORT).show();
+                     Intent intent = new Intent(v.getContext(), mainpage.class);
+                     startActivity(intent);
+                     *************************************************/
                 }
             }
         });
@@ -141,9 +157,11 @@ public class signup extends TakePhotoActivity {
                 if (!recentTouxiang.getParentFile().exists())
                     recentTouxiang.getParentFile().mkdirs();
                 imageUri = Uri.fromFile(recentTouxiang);
-                CropOptions.Builder builder = new CropOptions.Builder();
+                CropOptions.Builder builder=new CropOptions.Builder().setAspectX(1).setAspectY(1);
+                CompressConfig compressConfig=new CompressConfig.Builder().setMaxSize(2 * 1024).setMaxPixel(200).create();
                 takePhoto = getTakePhoto();
-                takePhoto.onPickFromGalleryWithCrop(imageUri, builder.create());
+                takePhoto.onPickFromGalleryWithCrop(imageUri,builder.create());
+                takePhoto.onEnableCompress(compressConfig,true);
             }
         });
     }
@@ -212,19 +230,11 @@ public class signup extends TakePhotoActivity {
                 + ja.getJSONObject(0).getString("user_ID"));
 
         if (ja.getJSONObject(0).getString("type").equals("sign_up")) {
-            String result = ja.getJSONObject(0).getString("result");
+            result = ja.getJSONObject(0).getString("result");
             System.out.println(result);
-            if (result.equals("success")) {
+            if (result.equals("true")) {
                 System.out.println(ja.getJSONObject(0).getString("user_ID"));
-                Toast.makeText(signup.this, "注册成功！奇葩君欢迎你的加入(●ˇ∀ˇ●)", Toast.LENGTH_SHORT).show();
                 return ja.getJSONObject(0).getString("user_ID");
-            }
-            else {
-                String reason = ja.getJSONObject(0).getString("reason");
-                if (reason.equals("repeated_id")) {
-                    Toast.makeText(signup.this, "已经用这个账号注册过了哟！", Toast.LENGTH_SHORT).show();
-                }
-                return null;
             }
         }
         return null;

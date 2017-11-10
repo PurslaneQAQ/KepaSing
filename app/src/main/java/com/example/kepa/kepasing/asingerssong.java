@@ -35,6 +35,7 @@ import static com.example.kepa.kepasing.MainActivity.client;
 public class asingerssong extends AppCompatActivity {
     ArrayList<String> passedsingerinfo=new ArrayList<String>();
     //存放这个歌手名下的歌曲名数组
+    private boolean finished = false;
     private String[] songid = null;
     String[] songname=null;
             /*{
@@ -45,30 +46,35 @@ public class asingerssong extends AppCompatActivity {
     AssetManager newsongimageAsset=null;
     private String FromServer;
 
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                FromServer = client.sendString(BuildJson());
+                Log.i("client", FromServer);
+                ParseJson(FromServer);
+                File directory = new File(getCacheDir() + "/img/");
+                if (!directory.exists())
+                    directory.mkdirs();
+                for(int i = 0; i < songid.length; i++){
+                    if(!(new File(directory.toString() + songid[i] + ".jpg").exists()))
+                        client.getFile(getSongPic(i), directory.toString());
+                }
+                finished = true;
+            } catch (JSONException e) {
+                System.out.println("build json failed");
+                e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_asingerssong);
-        client = new Client();
-        try {
-            FromServer = client.sendString(BuildJson());
-            Log.i("client", FromServer);
-            ParseJson(FromServer);
-            File directory = new File(getCacheDir() + "/song/");
-            if (!directory.exists())
-                directory.mkdirs();
-            for(int i = 0; i < songid.length; i++){
-                client.getFile(getSongPic(i), directory.toString());
-            }
-        } catch (JSONException e) {
-            System.out.println("build json failed");
-            e.printStackTrace();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-
         //页面头部信息 接收由choosesinger页面传过来的歌手名
         passedsingerinfo=(ArrayList<String>)getIntent().getStringArrayListExtra("Singerinfos");
         ImageView gobackbtn=(ImageView)findViewById(R.id.gobackbutton);
@@ -92,12 +98,15 @@ public class asingerssong extends AppCompatActivity {
         //ListView内容绑定
         ListView lv=(ListView)findViewById(R.id.songs);
         ArrayList<HashMap<String,Object>>listItem=new ArrayList<HashMap<String, Object>>();
-
-        for(int i=0;i<songid.length;i++){
-            HashMap<String,Object>map=new HashMap<String,Object>();
-            map.put("ItemImage",getBitmap(i));
-            map.put("ItemTitle",songname[i]);
-            listItem.add(map);
+        new Thread(runnable).start();
+        while(!finished){}
+        if(songid != null){
+            for(int i=0;i<songid.length;i++){
+                HashMap<String,Object>map=new HashMap<String,Object>();
+                map.put("ItemImage",getBitmap(i));
+                map.put("ItemTitle",songname[i]);
+                listItem.add(map);
+            }
         }
         SimpleAdapter simpleAdapter=new SimpleAdapter(this,listItem,R.layout.asong_layout,
                 new String[]{"ItemImage","ItemTitle"},new int[]{R.id.ItemImage,R.id.ItemTitle});
@@ -133,7 +142,7 @@ public class asingerssong extends AppCompatActivity {
         Bitmap mBitmap = null;
         InputStream assetFile=null;
         ContentResolver resolver = getContentResolver();
-        File songFile = new File(getCacheDir() + "/song/" + songid + ".jpg");
+        File songFile = new File(getCacheDir() + "/img/" + songid[i] + ".jpg");
         //URL url = new URL();   //如果是给网络上的URL
         //HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         //InputStream is = conn.getInputStream();
@@ -148,16 +157,15 @@ public class asingerssong extends AppCompatActivity {
     }
 
     private String BuildJson() throws JSONException {
-
         JSONObject inf;
         inf = new JSONObject();
-
         try {
             //inf.put("number", );
             JSONArray array = new JSONArray();
             JSONObject arr2 = new JSONObject();
             arr2.put("type", "A_singer");
-            arr2.put("singer_name",passedsingerinfo.get(0));
+            passedsingerinfo = (ArrayList<String>)getIntent().getStringArrayListExtra("Singerinfos");
+            arr2.put("singer_name",passedsingerinfo.get(0).toString());
             System.out.println(arr2.toString());
             array.put(arr2);
             inf.put("kepa", array);
@@ -168,19 +176,17 @@ public class asingerssong extends AppCompatActivity {
         }
         System.out.println("\n最终构造的JSON数据格式：");
         System.out.println(inf.toString());
-
         return inf.toString();
     }
 
     private String getSongPic(int i) throws JSONException {
-
         JSONObject inf;
         inf = new JSONObject();
         try {
             //inf.put("number", );
             JSONArray array = new JSONArray();
             JSONObject arr2 = new JSONObject();
-            arr2.put("type", "song_picture");
+            arr2.put("type", "picture_song");
             arr2.put("song_ID",songid[i]);
             System.out.println(arr2.toString());
             array.put(arr2);
@@ -192,7 +198,6 @@ public class asingerssong extends AppCompatActivity {
         }
         System.out.println("\n最终构造的JSON数据格式：");
         System.out.println(inf.toString());
-
         return inf.toString();
     }
 
@@ -212,7 +217,7 @@ public class asingerssong extends AppCompatActivity {
             for(int i = 1; i < ja.length(); i++){
                 System.out.println("\n song_ID: " + ja.getJSONObject(i).getString("song_ID"));
                 System.out.println(" song_name: " + ja.getJSONObject(i).getString("song_name"));
-                songid[i-1] = ja.getJSONObject(i).getString("song_id");
+                songid[i-1] = ja.getJSONObject(i).getString("song_ID");
                 songname[i-1] = ja.getJSONObject(i).getString("song_name");
             }
         }

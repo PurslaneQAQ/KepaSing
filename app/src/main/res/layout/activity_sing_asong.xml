@@ -26,13 +26,65 @@
             android:textSize="18dp"
             android:layout_centerInParent="true"/>
     </RelativeLayout>
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="唱歌界面"/>
-    </LinearLayout>
+        <com.example.kepa.kepasing.LyricView
+            android:id="@+id/lrcView"
+            android:background="@color/CommonGray"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </com.example.kepa.kepasing.LyricView>
+
+        <!--<TextView-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="唱歌界面"/>-->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom|center"
+            android:orientation="horizontal"
+            android:gravity="bottom|center">
+
+            <Button
+                android:id="@+id/start_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="200dp"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:text="START"
+                ></Button>
+            <Button
+                android:id="@+id/stop_button"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:layout_marginTop="200dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="STOP"
+                ></Button>
+            <Button
+                android:id="@+id/play_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="200dp"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:text="PLAY"
+                ></Button>
+            <Button
+                android:id="@+id/upload_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="200dp"
+                android:gravity="center"
+                android:layout_gravity="center"
+                android:text="UPLOAD"
+                ></Button>
+
+        </LinearLayout>
+    </RelativeLayout>
 </LinearLayout>

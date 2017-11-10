@@ -15,7 +15,10 @@ import android.widget.Toast;
 
 import com.jph.takephoto.app.TakePhoto;
 import com.jph.takephoto.app.TakePhotoActivity;
+import com.jph.takephoto.compress.CompressConfig;
 import com.jph.takephoto.model.CropOptions;
+import com.jph.takephoto.model.MultipleCrop;
+import com.jph.takephoto.model.TException;
 import com.jph.takephoto.model.TResult;
 
 import org.json.JSONArray;
@@ -27,9 +30,9 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import static com.example.kepa.kepasing.CenterPageFragment.nickname;
-import static com.example.kepa.kepasing.CenterPageFragment.password;
 import static com.example.kepa.kepasing.MainActivity.UserID;
 import static com.example.kepa.kepasing.MainActivity.client;
+import static com.example.kepa.kepasing.MainActivity.password;
 
 
 public class profileedit extends TakePhotoActivity {
@@ -37,13 +40,13 @@ public class profileedit extends TakePhotoActivity {
     private String FromServer;
     private TakePhoto takePhoto;
     private ImageView touxiang;
-    //private String password;
     private EditText password_label;
     //private String nickname;
     private EditText nickname_label;
     private Uri imageUri;
     private File temp_file;
     private File recentTouxiang;
+    private String result = null;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -55,8 +58,8 @@ public class profileedit extends TakePhotoActivity {
         nickname_label = (EditText) findViewById(R.id.nickname);
         nickname_label.setText(nickname);
         password_label.setText(password);
-        temp_file=new File(getCacheDir() + "/user/img/"+ UserID+ "_temp" + ".jpg");//abd should be replaced by userID
-        recentTouxiang =new File(getFilesDir() + "/user/img/"+ UserID + ".jpg");//abd should be replaced by userID
+        temp_file=new File(getExternalCacheDir() + "/img/"+ UserID + ".png");//abd should be replaced by userID
+        recentTouxiang =new File(getExternalFilesDir("img") + "/user/" + UserID + ".png");//abd should be replaced by userID
 
         goback.setOnClickListener(new View.OnClickListener() {//左上角返回键
             @Override
@@ -87,8 +90,10 @@ public class profileedit extends TakePhotoActivity {
                 //Toast.makeText(profileedit.this, "修改头像", Toast.LENGTH_SHORT).show();
                 if (!temp_file.getParentFile().exists())temp_file.getParentFile().mkdirs();
                 imageUri = Uri.fromFile(temp_file);
-                CropOptions.Builder builder=new CropOptions.Builder();
+                CropOptions.Builder builder=new CropOptions.Builder().setAspectX(1).setAspectY(1);
+                CompressConfig compressConfig=new CompressConfig.Builder().setMaxSize(2*1024).setMaxPixel(800).create();
                 takePhoto = getTakePhoto();
+                takePhoto.onEnableCompress(compressConfig,true);
                 takePhoto.onPickFromGalleryWithCrop(imageUri,builder.create());
             }
         });
@@ -100,24 +105,16 @@ public class profileedit extends TakePhotoActivity {
                 @Override
                 public void run() {
                     Log.i("client", "wozhendeyaojinqule");
-                    client = new Client();
                     try {
                         FromServer = client.sendString(BuildJson());
-
                         Log.i("client", FromServer);
-                        if (ParseJson(FromServer)) {
-                            if(temp_file.exists()){
-                                temp_file.renameTo(recentTouxiang);
-                                client.sendFile(recentTouxiang.toString());
-                            }
-                            Toast.makeText(profileedit.this, "保存成功(●ˇ∀ˇ●)", Toast.LENGTH_SHORT).show();
-                            if(temp_file.exists()){
-                                temp_file.renameTo(recentTouxiang);
-                            }
-                            onBackPressed();
+                        ParseJson(FromServer);
+                        if(result.equals("success") && temp_file.exists()){
+                            imgWatermark wm = new imgWatermark();
+                            wm.watermarkBitmap(temp_file.toString(), getResources());
+                            temp_file.renameTo(recentTouxiang);
+                            client.sendFile(recentTouxiang.toString());
                         }
-                        else
-                            Toast.makeText(profileedit.this, "程序猿开小差了/(ㄒoㄒ)/~~", Toast.LENGTH_SHORT).show();
                     } catch (JSONException e) {
                         System.out.println("build json failed");
                         e.printStackTrace();
@@ -160,7 +157,7 @@ public class profileedit extends TakePhotoActivity {
 
                 return inf.toString();
             }
-            public boolean ParseJson(String jsonString) throws JSONException,
+            public void ParseJson(String jsonString) throws JSONException,
                     java.text.ParseException {
 
                 JSONObject jo = new JSONObject(jsonString);
@@ -172,15 +169,9 @@ public class profileedit extends TakePhotoActivity {
                         + " result: " + ja.getJSONObject(0).getString("result"));
 
                 if (ja.getJSONObject(0).getString("type").equals("edit")) {
-                    String result = ja.getJSONObject(0).getString("result");
+                    result = ja.getJSONObject(0).getString("result");
                     System.out.println(result);
-                    if (result.equals("success")) {
-                       return true;
-                    } else {
-                       return false;
-                    }
                 }
-                return false;
             }
 
             @Override
@@ -192,10 +183,21 @@ public class profileedit extends TakePhotoActivity {
                 if (password.length() < 6) {
                     Toast.makeText(profileedit.this, "江湖危险，请设置更长一点的密码哟！", Toast.LENGTH_SHORT).show();
                 }
+                else if (password.length() > 12) {
+                    Toast.makeText(profileedit.this, "服务器表示这么长的密码我记不住啦！", Toast.LENGTH_SHORT).show();
+                }
                 else {
                     new Thread(runnable).start();
+                    while(result == null){}
+                    if(result.equals("success")){
+                        Toast.makeText(profileedit.this, "保存成功(●ˇ∀ˇ●)", Toast.LENGTH_SHORT).show();
+                        onBackPressed();
+                    }
+                    else {
+                        Toast.makeText(profileedit.this, "程序猿开小差了/(ㄒoㄒ)/~~", Toast.LENGTH_SHORT).show();
+                    }
                 }
-                //onBackPressed();//修改这个函数，这里只是按下跳回了个人主页而已
+                //
             }
         });
     }

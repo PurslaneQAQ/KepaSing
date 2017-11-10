@@ -20,17 +20,21 @@ import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
+
     public static String UserID;
     public static Client client;
     private String FromServer;
     private String email;
     private EditText email_label;
-    private String password;
+    public static String password;
     private EditText password_label;
+    private String result;
+    private String reason;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        client = new Client();
         email_label = (EditText)findViewById(R.id.email);
         password_label = (EditText)findViewById(R.id.password);
         /*StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
@@ -44,17 +48,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             Log.i("client","wozhendeyaojinqule");
-            client = new Client();
             try{
                 FromServer = client.sendString(BuildJson());
                 Log.i("client",FromServer);
                 UserID = ParseJson(FromServer);
-                if(UserID != null)
-                {
-                    Intent intent=new Intent(MainActivity.this,mainpage.class);
-                    startActivity(intent);
-                }
-                //if(UserID!=null) Log.i("client",UserID);
             }catch(JSONException e){
                 System.out.println("build json failed");
                 e.printStackTrace();
@@ -74,8 +71,24 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "邮箱要输入完整哟！", Toast.LENGTH_SHORT).show();
         else if(password.length() < 6)
             Toast.makeText(MainActivity.this, "咦，密码不大对吧QwQ", Toast.LENGTH_SHORT).show();
-        else
+        else {
             new Thread(runnable).start();
+            while(result == null){}
+            if (result.equals("true")) {
+                Intent intent = new Intent(MainActivity.this, mainpage.class);
+                startActivity(intent);
+            }
+            else {
+                if (reason != null) {
+                    if (reason.equals("fail1")) {
+                        Toast.makeText(MainActivity.this, "小主！还记得大明湖畔的夏雨荷吗？失忆啦，用户名错啦！", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(MainActivity.this, "妈诶手滑了吗，密码不对哟！", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        }
+
         /******************for_try***********************
         Intent intent=new Intent(this,mainpage.class);
         startActivity(intent);
@@ -123,18 +136,13 @@ public class MainActivity extends AppCompatActivity {
                 + ja.getJSONObject(0).getString("user_ID"));
 
         if (ja.getJSONObject(0).getString("type").equals("login")) {
-            String result = ja.getJSONObject(0).getString("result");
+            result = ja.getJSONObject(0).getString("result");
             System.out.println(result);
             if (result.equals("true")) {
                 System.out.println(ja.getJSONObject(0).getString("user_ID"));
                 return ja.getJSONObject(0).getString("user_ID");
             } else {
-                String reason = ja.getJSONObject(0).getString("reason");
-                if (reason.equals("name")) {
-                    Toast.makeText(MainActivity.this, "小主！还记得大明湖畔的夏雨荷吗？失忆啦，用户名错啦！", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(MainActivity.this, "妈诶手滑了吗，密码不对哟！", Toast.LENGTH_SHORT).show();
-                }
+                reason = ja.getJSONObject(0).getString("result");
                 return null;
             }
         }
