@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.ImageView;
 import com.gjiazhe.wavesidebar.WaveSideBar;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class choosesinger extends AppCompatActivity {
 
@@ -67,6 +69,15 @@ public class choosesinger extends AppCompatActivity {
 
     private void initData() {
         singers.addAll(Singer.getSingers());
+        Collections.sort(singers, new MyComparator());
+    }
+
+    class MyComparator implements Comparator {
+        public int compare(Object o1, Object o2) {
+            String i1 = ((Singer)o1).getIndex();
+            String i2 = ((Singer)o2).getIndex();
+            return i1.compareTo(i2);
+        }
     }
 
 }

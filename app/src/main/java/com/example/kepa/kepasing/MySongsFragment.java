@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,6 +12,8 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +42,7 @@ import static com.example.kepa.kepasing.CenterPageFragment.mMediaPlayer;
 import static com.example.kepa.kepasing.CenterPageFragment.mPlayTimeDuration;
 import static com.example.kepa.kepasing.CenterPageFragment.mTask;
 import static com.example.kepa.kepasing.CenterPageFragment.mTimer;
+import static com.example.kepa.kepasing.CenterPageFragment.play_music;
 import static com.example.kepa.kepasing.CenterPageFragment.onplaysongname;
 import static com.example.kepa.kepasing.CenterPageFragment.stopSeekBar;
 import static com.example.kepa.kepasing.MainActivity.UserID;
@@ -52,6 +56,8 @@ import static com.example.kepa.kepasing.MainActivity.password;
 public class MySongsFragment extends Fragment {
 
     public static final String ARG_PAGE = "ARG_PAGE";
+    public static String last_song = null;
+    public static String next_song = null;
     private int mPage;
     private String FromServer;
     String[] songid = null;
@@ -75,10 +81,14 @@ public class MySongsFragment extends Fragment {
      };*/
 
     //存放本地作品
-    String[] localsongname=new String[]{
+    String[] localsongname=null;
+    /*{
+    new String[]；
             "Born To Die","Rolling In the Deep","Innocence","Toxic","Grenade","Read All About It",
             "Love the Way You Lie","My Songs Know What You Did In the Dark","Castle"
-    };
+    };*/
+
+    List<String> local_Files = null;
 
 
     /*歌曲图片*/
@@ -171,10 +181,56 @@ public class MySongsFragment extends Fragment {
         }
         return false;
     }
+
+    Runnable getSongNames = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                for(int i = 0; i < local_Files.size(); i++) {
+                    JSONObject inf;
+                    inf = new JSONObject();
+                    try {
+                        //inf.put("number", );
+                        JSONArray array = new JSONArray();
+                        JSONObject arr2 = new JSONObject();
+                        arr2.put("type", "song_info");
+                        arr2.put("song_ID",local_Files.get(i).toString().substring(0,5));
+                        System.out.println(arr2.toString());
+                        array.put(arr2);
+                        inf.put("kepa", array);
+                        System.out.println(array.toString());
+                        System.out.println(inf.toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("\n最终构造的JSON数据格式：");
+                    System.out.println(inf.toString());
+                    FromServer = client.sendString(inf.toString());
+                    Log.i("client", FromServer);
+                    localsongname[i] = ParseName(FromServer);
+                }
+            } catch (JSONException e) {
+                System.out.println("build json failed");
+                e.printStackTrace();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+            //FileTransferClient upload  = new FileTransferClient(recentTouxiang);
+        }
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         new Thread(runnable).start();
+        File local = getContext().getExternalFilesDir("song");
+        if(!local.exists()){
+            local.mkdirs();
+        }
+        local_Files = getFileList(local);
+        new Thread(getSongNames).start();
         mPage = getArguments().getInt(ARG_PAGE);
         /*try {
             songimageAsset=getContext().getAssets();
@@ -216,69 +272,23 @@ public class MySongsFragment extends Fragment {
                             }
                         }
                     });
-                   gv.setAdapter(simpleAdapter);
+                    gv.setAdapter(simpleAdapter);
                     gv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                         @Override
-                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                            //Toast.makeText(view.getContext(), "播放歌曲", Toast.LENGTH_SHORT).show();
-                            //点击链接底下的播放器播放
-                            try {
-                                mMediaPlayer = new MediaPlayer();
-                                File file = new File(getContext().getExternalCacheDir() + "/song/"+ songid[position] + UserID + ".mp3");
-                                mMediaPlayer.setDataSource(file.getAbsolutePath());
-                                mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                                    @Override
-                                    public void onPrepared(MediaPlayer mp) {
-                                    //绑定进度条
-                                    if(mTimer == null)
-                                    {
-                                        mTimer = new Timer();
-                                        //mTask = new scoreasong.SeekBarUpdate();
-                                        mTimer.scheduleAtFixedRate(mTask,0,mPlayTimeDuration);
-                                    }
-                                    }
-                                });
-                                mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                    @Override
-                                    public void onCompletion(MediaPlayer mp) {
-                                    if (mMediaPlayer != null) {
-                                        mMediaPlayer.stop();
-                                        mMediaPlayer.release();
-                                        mMediaPlayer = null;
-                                    }
-                                    stopSeekBar();
-                                    }
-                                });
-//            user_sound.stop();
-                            }catch(Exception e)
-                            {
-                                e.printStackTrace();
-                            }
-                            mMediaPlayer.start();
-                        }
-                    });
-                }
-                break;
-            case 2://本地作品
-                File local = getContext().getExternalFilesDir("song");
-                if(!local.exists()){
-                    local.mkdirs();
-                }
-                final List<String> local_Files = getFileList(local);
-                localsongname = new String[local_Files.size()];
-                Runnable getSongNames = new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            for(int i = 0; i < local_Files.size(); i++) {
+                        public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+                        //Toast.makeText(view.getContext(), "播放歌曲", Toast.LENGTH_SHORT).show();
+                        //点击链接底下的播放器播放
+                        Runnable getSingerRunnable = new Runnable() {
+                        @Override
+                            public void run() {
                                 JSONObject inf;
                                 inf = new JSONObject();
                                 try {
                                     //inf.put("number", );
                                     JSONArray array = new JSONArray();
                                     JSONObject arr2 = new JSONObject();
-                                    arr2.put("type", "song_info");
-                                    arr2.put("song_ID",local_Files.get(i).toString().substring(0,4));
+                                    arr2.put("type", "scored_song");
+                                    arr2.put("scored_ID",songid[position]);
                                     System.out.println(arr2.toString());
                                     array.put(arr2);
                                     inf.put("kepa", array);
@@ -289,22 +299,60 @@ public class MySongsFragment extends Fragment {
                                 }
                                 System.out.println("\n最终构造的JSON数据格式：");
                                 System.out.println(inf.toString());
-                                FromServer = client.sendString(inf.toString());
-                                Log.i("client", FromServer);
-                                localsongname[i] = ParseName(FromServer);
+                                if(!(new File(getContext().getExternalFilesDir("song") + "/" + songid[position] + ".amr").exists()))
+                                    client.getFile(inf.toString(), getContext().getExternalFilesDir("song") + "/");
+                                //System.out.println(getContext().getExternalFilesDir("song") + "/" + songid[position] + ".amr");
                             }
-                        } catch (JSONException e) {
-                            System.out.println("build json failed");
-                            e.printStackTrace();
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        } catch (Exception e){
+                        };
+                        File file = new File(getContext().getExternalFilesDir("song") + "/" + songid[position] + ".amr");
+                            System.out.println(file.toString());
+                        mMediaPlayer = new MediaPlayer();
+                        try {
+                            if(!file.exists()){
+                                new Thread(getSingerRunnable).start();
+                            }
+                            while(!file.exists()){}
+                            try {
+                                mMediaPlayer.setDataSource(file.toString());
+                                play_music = true;
+                                mMediaPlayer.start();
+                            }catch (IOException e){
+                                System.out.println("Failed to load the media.");
+                            }
+                            onplaysongname.setText(songnames[position]);
+                            mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                                @Override
+                                public void onPrepared(MediaPlayer mp) {
+                                //绑定进度条
+                                if(mTimer == null)
+                                {
+                                    mTimer = new Timer();
+                                    //mTask = new scoreasong.SeekBarUpdate();
+                                    mTimer.scheduleAtFixedRate(mTask,0,mPlayTimeDuration);
+                                }
+                                }
+                            });
+                            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                @Override
+                                public void onCompletion(MediaPlayer mp) {
+                                if (mMediaPlayer != null) {
+                                    mMediaPlayer.stop();
+                                    mMediaPlayer.release();
+                                    mMediaPlayer = null;
+                                }
+                                stopSeekBar();
+                                }
+                            });
+//            user_sound.stop();
+                        }catch(Exception e) {
                             e.printStackTrace();
                         }
-                        //FileTransferClient upload  = new FileTransferClient(recentTouxiang);
-                    }
-                };
-                new Thread(getSongNames).start();
+                        }
+                    });
+                }
+                break;
+            case 2://本地作品
+                localsongname = new String[local_Files.size()];
                 while(localsongname == null){}
                 for(int i=0;i<local_Files.size();i++){
                     HashMap<String,Object>map=new HashMap<String,Object>();
@@ -333,12 +381,42 @@ public class MySongsFragment extends Fragment {
                             //点击播放
                             //Toast.makeText(view.getContext(), "播放歌曲", Toast.LENGTH_SHORT).show();
                             try {
-                                mMediaPlayer.setDataSource(local_Files.get(position).toString());
+                                mMediaPlayer.setDataSource(getContext().getExternalFilesDir("song") + local_Files.get(position).toString());
+                                if(position < local_Files.size() - 1) {
+                                    next_song = local_Files.get(position + 1).substring(0, 10);
+                                }
+                                else next_song = null;
+                                if(position > 0){
+                                    last_song = local_Files.get(position - 1).substring(0, 10);
+                                }
+                                else last_song = null;
                                 mMediaPlayer.start();
-                            }catch (IOException e){
+                            } catch (IOException e) {
                                 System.out.println("Failed to load the media.");
                             }
                             onplaysongname.setText(localsongname[position]);
+                            mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                                @Override
+                                public void onPrepared(MediaPlayer mp) {
+                                    //绑定进度条
+                                    if (mTimer == null) {
+                                        mTimer = new Timer();
+                                        //mTask = new scoreasong.SeekBarUpdate();
+                                        mTimer.scheduleAtFixedRate(mTask, 0, mPlayTimeDuration);
+                                    }
+                                }
+                            });
+                            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                @Override
+                                public void onCompletion(MediaPlayer mp) {
+                                    if (mMediaPlayer != null) {
+                                        mMediaPlayer.stop();
+                                        mMediaPlayer.release();
+                                        mMediaPlayer = null;
+                                    }
+                                    stopSeekBar();
+                                }
+                            });
                         }
                     });
                 }
@@ -369,11 +447,12 @@ public class MySongsFragment extends Fragment {
         if (!file.isDirectory()) {
             System.out.println(file.getAbsolutePath());
             result.add(file.getAbsolutePath());
-        } else {
+        }
+        else {
             // 内部匿名类，用来过滤文件类型
             File[] directoryList = file.listFiles(new FileFilter() {
                 public boolean accept(File file) {
-                    if (file.isFile() && file.getName().indexOf("mp3") > -1) {
+                    if (file.isFile() && (file.getName().indexOf("amr") > -1 || file.getName().indexOf("mp3") > -1)) {
                         return true;
                     } else {
                         return false;
@@ -381,9 +460,11 @@ public class MySongsFragment extends Fragment {
                 }
             });
             for (int i = 0; i < directoryList.length; i++) {
-                result.add(directoryList[i].getName().substring(0,5));
+                result.add(directoryList[i].getName());
+                System.out.println("Local file:" + result.get(i));
             }
         }
+
         return result;
     }
     //图片转bitmap
@@ -394,9 +475,10 @@ public class MySongsFragment extends Fragment {
           InputStream is = conn.getInputStream();   */
         ContentResolver resolver = getContext().getContentResolver();
         try {
-            mBitmap = MediaStore.Images.Media.getBitmap(resolver, Uri.fromFile(new File(getContext().getExternalFilesDir("img") +  "/user/" + UserID + ".jpg")));
+            mBitmap = MediaStore.Images.Media.getBitmap(resolver, Uri.fromFile(new File(getContext().getExternalFilesDir("img") +  "/user/" + UserID + ".png")));
         } catch (IOException e) {
             e.printStackTrace();
+            mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.mainicon);
         }
         return mBitmap;
     }

@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -37,6 +38,8 @@ import java.util.TimerTask;
 
 import static com.example.kepa.kepasing.MainActivity.UserID;
 import static com.example.kepa.kepasing.MainActivity.client;
+import static com.example.kepa.kepasing.MySongsFragment.last_song;
+import static com.example.kepa.kepasing.MySongsFragment.next_song;
 
 /**
  * Created by Administrator on 2017/10/25 0025.
@@ -52,7 +55,7 @@ public class CenterPageFragment extends Fragment {
 
     //public static File[] mysongimages=null;
     public static MediaPlayer mMediaPlayer= null;
-    private boolean play_music = false;
+    public static boolean play_music = false;
 
     public static Timer mTimer;
     public static TimerTask mTask;
@@ -115,7 +118,6 @@ public class CenterPageFragment extends Fragment {
         @Override
         public void run() {
             Log.i("client", "wozhendeyaojinqule");
-            client = new Client();
             try {
                 FromServer = client.sendString(BuildJson(false));
                 File directory = new File(getContext().getExternalFilesDir("img") + "/user/");
@@ -194,12 +196,13 @@ public class CenterPageFragment extends Fragment {
         ImageView icon=(ImageView)view.findViewById(R.id.person);//头像 到时候从服务器上取
         resolver = getActivity().getApplicationContext().getContentResolver();
         while(nickname ==null){}
-        File portrait = new File(getContext().getExternalFilesDir("img")+ "/user/" + UserID + ".jpg");
+        File portrait = new File(getContext().getExternalFilesDir("img")+ "/user/" + UserID + ".png");
         try {
             Bitmap bm = MediaStore.Images.Media.getBitmap(resolver, Uri.fromFile(portrait));
             icon.setImageBitmap(bm);
         }catch (IOException e) {
             e.printStackTrace();
+            icon.setImageResource(R.drawable.mainicon);
         }
 
         TextView nickname_Label=(TextView)view.findViewById(R.id.nickname);
@@ -240,13 +243,44 @@ public class CenterPageFragment extends Fragment {
         last=(ImageView)view.findViewById(R.id.btn_last);
         last.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {}});
+            public void onClick(View v) {
+                if(last_song != null) {
+                    GetSong newintent = new GetSong(last_song);
+                    newintent.start();
+                }
+                else
+                    Toast.makeText(getContext(), "没有更上一首歌啦！", Toast.LENGTH_SHORT).show();
+
+            }});
+
         play=(ImageView)view.findViewById(R.id.btn_play);
         play.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {mMediaPlayer.start();
-            }});
+            public void onClick(View v) {
+                if(mMediaPlayer != null){
+                    if(!play_music){
+                        mMediaPlayer.start();
+                        play.setImageResource(R.drawable.play);
+                    }
+                    else{
+                        mMediaPlayer.pause();
+                        play.setImageResource(R.drawable.pause);
+                    }
+                }
+            }
+        });
         next=(ImageView)view.findViewById(R.id.btn_next);
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(next_song!= null) {
+                    GetSong newintent = new GetSong(next_song);
+                    newintent.start();
+                }
+                else
+                    Toast.makeText(getContext(), "没有更下一首歌啦！", Toast.LENGTH_SHORT).show();
+
+            }});
 
         last.setImageResource(R.drawable.last);
         play.setImageResource(R.drawable.pause);
@@ -275,6 +309,55 @@ public class CenterPageFragment extends Fragment {
         });
         return view;
     }
+
+    class GetSong extends Thread{
+        String songid;
+        public GetSong(String id){
+            songid = id;
+        }
+        @Override
+        public void run(){
+            File file = new File(getContext().getExternalFilesDir("mp3").toString() + songid+".amr");
+            if(!file.exists()) {
+                Log.i("client", "wozhendeyaojinqule");
+                try {
+                    MainActivity.client.getFile(BuildJson_GoForSingPage(songid), file.getParent());
+                    mMediaPlayer.setDataSource(file.toString());
+                } catch (JSONException e) {
+                    System.out.println("Failed to get file");
+                }catch (IOException e) {
+                    System.out.println("Can not load the song.");
+                }
+                Log.i("client", "wotmyijingchulaile");
+            }
+        }
+    }
+
+    private String BuildJson_GoForSingPage(String song_id) throws JSONException {
+
+        JSONObject inf;
+        inf = new JSONObject();
+        try {
+            //inf.put("number", );
+            JSONArray array = new JSONArray();
+            JSONObject arr2 = new JSONObject();
+            arr2.put("type", "sing_mp3");
+            arr2.put("song_ID",song_id);
+            System.out.println(arr2.toString());
+            array.put(arr2);
+
+            inf.put("kepa", array);
+            System.out.println(array.toString());
+            System.out.println(inf.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        System.out.println("\n最终构造的JSON数据格式：");
+        System.out.println(inf.toString());
+
+        return inf.toString();
+    }
+
     class SeekBarUpdate extends TimerTask {
         @Override
         public void run(){
@@ -309,5 +392,4 @@ public class CenterPageFragment extends Fragment {
         }
         stopSeekBar();
     }
-
 }

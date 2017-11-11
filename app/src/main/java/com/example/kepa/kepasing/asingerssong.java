@@ -23,6 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -53,11 +54,11 @@ public class asingerssong extends AppCompatActivity {
                 FromServer = client.sendString(BuildJson());
                 Log.i("client", FromServer);
                 ParseJson(FromServer);
-                File directory = new File(getCacheDir() + "/img/");
+                File directory = new File(getExternalCacheDir() + "/img/");
                 if (!directory.exists())
                     directory.mkdirs();
                 for(int i = 0; i < songid.length; i++){
-                    if(!(new File(directory.toString() + songid[i] + ".jpg").exists()))
+                    if(!(new File(directory.toString() + songid[i] + ".png").exists()))
                         client.getFile(getSongPic(i), directory.toString());
                 }
                 finished = true;
@@ -132,7 +133,8 @@ public class asingerssong extends AppCompatActivity {
                 songname.add(tv.getText().toString());
                 Intent intent=new Intent(parent.getContext(),singasong.class);
                 intent.putStringArrayListExtra("Songinfos",songname);
-                startActivity(intent);
+                GoForSingPage newintent = new GoForSingPage(position);
+                newintent.start();
             }
         });
 
@@ -142,7 +144,7 @@ public class asingerssong extends AppCompatActivity {
         Bitmap mBitmap = null;
         InputStream assetFile=null;
         ContentResolver resolver = getContentResolver();
-        File songFile = new File(getCacheDir() + "/img/" + songid[i] + ".jpg");
+        File songFile = new File(getExternalCacheDir() + "/img/" + songid[i] + ".png");
         //URL url = new URL();   //如果是给网络上的URL
         //HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         //InputStream is = conn.getInputStream();
@@ -165,7 +167,7 @@ public class asingerssong extends AppCompatActivity {
             JSONObject arr2 = new JSONObject();
             arr2.put("type", "A_singer");
             passedsingerinfo = (ArrayList<String>)getIntent().getStringArrayListExtra("Singerinfos");
-            arr2.put("singer_name",passedsingerinfo.get(0).toString());
+            arr2.put("singer_ID",passedsingerinfo.get(1).toString());
             System.out.println(arr2.toString());
             array.put(arr2);
             inf.put("kepa", array);
@@ -222,5 +224,100 @@ public class asingerssong extends AppCompatActivity {
             }
         }
         else Toast.makeText(asingerssong.this, "加载失败了QwQ请再试一次吧！", Toast.LENGTH_SHORT).show();
+    }
+
+    class GoForSingPage extends Thread{
+        private int position;
+        public GoForSingPage(int position){
+            this.position = position;
+        }
+        @Override
+        public void run(){
+            Log.i("client", "wozhendeyaojinqule");
+            try {
+                File file = new File(getExternalFilesDir(null).toString()+"/lrc/"+ songid[position]+".lrc");
+                if(!file.exists())
+                {
+                    MainActivity.client.getFile(BuildJson_GoForSingPage(1,songid[position]),getExternalFilesDir(null).toString()+"/lrc");
+                }
+                System.out.println("getfile"+songid[position]);
+                File file_sound = new File(getExternalFilesDir(null).toString()+"/mp3/"+songid[position]+".mp3");
+                if(!file_sound.exists())
+                {
+                    MainActivity.client.getFile(BuildJson_GoForSingPage(2,songid[position]),getExternalFilesDir(null).toString()+"/mp3");
+                }
+                System.out.println("getfile"+songid[position]+"mp3");
+//                Log.i("client", FromServer);
+//                ParseJson(FromServer);
+//                Log.i("client", "success");
+            } catch (JSONException e) {
+                System.out.println("build json failed");
+                e.printStackTrace();
+            }
+            Log.i("client", "wotmyijingchulaile");
+//                FileTransferClient upload  = new FileTransferClient(file);
+        }
+    }
+
+    private String BuildJson_GoForSingPage(int i, String song_id) throws JSONException {
+
+        JSONObject inf;
+        inf = new JSONObject();
+
+        try {
+            //inf.put("number", );
+            JSONArray array = new JSONArray();
+            if(i==1)
+            {
+                JSONObject arr2 = new JSONObject();
+                arr2.put("type", "sing_lyric");
+                arr2.put("song_ID",song_id);
+                System.out.println(arr2.toString());
+                array.put(arr2);
+            }
+            else if(i == 2)
+            {
+                JSONObject arr2 = new JSONObject();
+                arr2.put("type", "sing_mp3");
+                arr2.put("song_ID",song_id);
+                System.out.println(arr2.toString());
+                array.put(arr2);
+            }
+
+            inf.put("kepa", array);
+            System.out.println(array.toString());
+            System.out.println(inf.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        System.out.println("\n最终构造的JSON数据格式：");
+        System.out.println(inf.toString());
+
+        return inf.toString();
+    }
+    private String BuildJson(String song_id) throws JSONException {
+
+        JSONObject inf;
+        inf = new JSONObject();
+
+        try {
+            JSONArray array = new JSONArray();
+
+            JSONObject arr2 = new JSONObject();
+            arr2.put("type", "picture_song");
+            arr2.put("song_ID", song_id);
+            System.out.println(arr2.toString());
+            array.put(arr2);
+
+            inf.put("kepa", array);
+            System.out.println(array.toString());
+            System.out.println(inf.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        System.out.println("\n最终构造的JSON数据格式：");
+        System.out.println(inf.toString());
+
+        return inf.toString();
     }
 }

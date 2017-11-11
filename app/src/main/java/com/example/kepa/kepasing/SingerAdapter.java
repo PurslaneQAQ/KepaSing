@@ -35,7 +35,7 @@ public class SingerAdapter extends RecyclerView.Adapter<SingerAdapter.SingersVie
 
     @Override
     public void onBindViewHolder(final SingersViewHolder holder, final int position) {
-        Singer singer = singers.get(position);
+        final Singer singer = singers.get(position);
         if (position == 0 || !singers.get(position-1).getIndex().equals(singer.getIndex())) {
             holder.tvIndex.setVisibility(View.VISIBLE);
             holder.tvIndex.setText(singer.getIndex());
@@ -47,11 +47,12 @@ public class SingerAdapter extends RecyclerView.Adapter<SingerAdapter.SingersVie
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent=new Intent(v.getContext(),asingerssong.class);
-                final ArrayList<String> SingerOrder=new ArrayList<String>();
-                SingerOrder.add(holder.tvName.getText().toString());
-                intent.putStringArrayListExtra("Singerinfos",SingerOrder);
-                v.getContext().startActivity(intent);
+            Intent intent=new Intent(v.getContext(),asingerssong.class);
+            final ArrayList<String> SingerOrder=new ArrayList<String>();
+            SingerOrder.add(singer.getName());
+                SingerOrder.add(singer.getID());
+            intent.putStringArrayListExtra("Singerinfos",SingerOrder);
+            v.getContext().startActivity(intent);
             }
         });
 

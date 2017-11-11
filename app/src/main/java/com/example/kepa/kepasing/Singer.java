@@ -20,13 +20,15 @@ import static com.example.kepa.kepasing.MainActivity.client;
 public class Singer {
     private String index;
     private String name;
+    private String id;
     public static List<Singer> singers;
     static String FromServer;
-    static boolean finished = false;
+    static public boolean finished = false;
 
-    public Singer(String index, String name) {
+    public Singer(String index, String name, String id) {
         this.index = index;
         this.name = name;
+        this.id = id;
     }
 
     public String getIndex() {
@@ -35,6 +37,10 @@ public class Singer {
 
     public String getName() {
         return name;
+    }
+
+    public String getID() {
+        return id;
     }
 
     private static String BuildJson() throws JSONException {
@@ -71,28 +77,29 @@ public class Singer {
 
         if (ja.getJSONObject(0).getString("type").equals("singer")) {
             for (int i = 1; i < ja.length(); i++) {
-                singers.add(new Singer(ja.getJSONObject(i).getString("index"), ja.getJSONObject(i).getString("singer")));
-                System.out.println("\nsinger" + i + " = "+singers.get(i-1).getName());
+                singers.add(new Singer(ja.getJSONObject(i).getString("index"), ja.getJSONObject(i).getString("singer"), ja.getJSONObject(i).getString("singer_ID")));
+                System.out.println("\nsinger" + i + " = " + singers.get(i - 1).getName());
             }
         }
         finished = true;
     }
-    static Runnable runnable = new Runnable(){
+
+    static Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            Log.i("client","wozhendeyaojinqule");
+            Log.i("client", "wozhendeyaojinqule");
             client = new Client();
-            try{
+            try {
                 FromServer = client.sendString(BuildJson());
-                Log.i("client",FromServer);
+                Log.i("client", FromServer);
                 ParseJson(FromServer);
-            }catch(JSONException e){
+            } catch (JSONException e) {
                 System.out.println("build json failed");
                 e.printStackTrace();
-            }catch(ParseException e){
+            } catch (ParseException e) {
                 e.printStackTrace();
             }
-            Log.i("client","wotmyijingchulaile");
+            Log.i("client", "wotmyijingchulaile");
 //                FileTransferClient upload  = new FileTransferClient(file);
         }
     };
@@ -101,6 +108,7 @@ public class Singer {
     public static List<Singer> getSingers() {
         //List<Singer>
         singers = new ArrayList<>();
+        finished = false;
         new Thread(runnable).start();
         /*singers.add(new Singer("A", "Avril Lavigne"));
         singers.add(new Singer("B", "B.O.B"));
@@ -123,7 +131,9 @@ public class Singer {
         singers.add(new Singer("X", "薛之谦"));
         singers.add(new Singer("Y", "杨宗纬"));
         singers.add(new Singer("Z", "张杰"));*/
-        while(!finished){}
+        while (!finished) {}
         return singers;
     }
 }
+
+

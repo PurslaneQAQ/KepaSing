@@ -26,7 +26,10 @@ public class mainpage extends AppCompatActivity {
     private MainPageFragment mainpage;
     private SingPageFragment singpage;
     private ScorePageFragment scorepage;
-    private CenterPageFragment centerpage;
+    public static CenterPageFragment centerpage;
+
+    //zyr
+    public static FragmentTransaction transaction;
 
     //zyt
     private boolean First_Come = true;
@@ -57,6 +60,10 @@ public class mainpage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mainpage);
         mFrameLayout=(FrameLayout)findViewById(R.id.fragment_container);
+
+        //zyr
+        FragmentManager fm = (new AppCompatActivity()).getSupportFragmentManager();
+        FragmentTransaction transaction = fm.beginTransaction();
 
         //zyt
         System.out.println("First_come"+First_Come);

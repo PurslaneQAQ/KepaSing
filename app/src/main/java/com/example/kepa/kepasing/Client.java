@@ -21,7 +21,7 @@ class Client {
     //    private Socket client;
     private DataOutputStream dos;
     private int flag = 0;
-    public static final String IP_ADDR = "10.180.87.86";//鏈嶅姟鍣ㄥ湴鍧
+    public static final String IP_ADDR = "10.180.177.227";//鏈嶅姟鍣ㄥ湴鍧
     public static final int PORT = 12345;//鏈嶅姟鍣ㄧ鍙ｅ彿
     private String FromServer = null;
 

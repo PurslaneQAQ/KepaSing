@@ -1,7 +1,6 @@
 package com.example.kepa.kepasing;
 
 import android.content.ContentResolver;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -17,8 +16,6 @@ import com.jph.takephoto.app.TakePhoto;
 import com.jph.takephoto.app.TakePhotoActivity;
 import com.jph.takephoto.compress.CompressConfig;
 import com.jph.takephoto.model.CropOptions;
-import com.jph.takephoto.model.MultipleCrop;
-import com.jph.takephoto.model.TException;
 import com.jph.takephoto.model.TResult;
 
 import org.json.JSONArray;
@@ -33,6 +30,8 @@ import static com.example.kepa.kepasing.CenterPageFragment.nickname;
 import static com.example.kepa.kepasing.MainActivity.UserID;
 import static com.example.kepa.kepasing.MainActivity.client;
 import static com.example.kepa.kepasing.MainActivity.password;
+import static com.example.kepa.kepasing.mainpage.centerpage;
+import static com.example.kepa.kepasing.mainpage.transaction;
 
 
 public class profileedit extends TakePhotoActivity {
@@ -190,6 +189,13 @@ public class profileedit extends TakePhotoActivity {
                     new Thread(runnable).start();
                     while(result == null){}
                     if(result.equals("success")){
+                        try {
+                            centerpage = CenterPageFragment.newInstance();
+                            transaction.replace(R.id.fragment_container, centerpage);
+                            transaction.commit();
+                        }catch(Exception e){
+                            System.out.println("Can not change center page");
+                        }
                         Toast.makeText(profileedit.this, "保存成功(●ˇ∀ˇ●)", Toast.LENGTH_SHORT).show();
                         onBackPressed();
                     }
