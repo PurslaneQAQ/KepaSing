@@ -2,7 +2,8 @@
 <!--排行页面上的一首歌布局（带排行数字）-->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="80dp"
-    android:layout_width="match_parent">
+    android:layout_width="match_parent"
+    android:background="@color/White">
 
     <TextView
         android:layout_width="wrap_content"
@@ -25,7 +26,7 @@
         android:layout_marginLeft="10dp"
         android:layout_alignTop="@id/ItemImage"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
+        android:layout_width="225dp"
         android:textSize="18sp"/>
     <TextView
         android:layout_width="wrap_content"
@@ -34,4 +35,16 @@
         android:layout_alignLeft="@id/ItemTitle"
         android:textSize="13sp"
         android:id="@+id/ItemText"/>
+    <Button
+        android:id="@+id/button"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="50dp"
+        android:layout_height="25dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/buybuttonstyle"
+        android:textColor="@color/CommonGray"
+        android:textSize="10sp" />
+
 </RelativeLayout>

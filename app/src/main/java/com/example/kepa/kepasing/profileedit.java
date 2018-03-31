@@ -2,6 +2,7 @@ package com.example.kepa.kepasing;
 
 import android.content.ContentResolver;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.ParseException;
 
@@ -30,9 +32,6 @@ import static com.example.kepa.kepasing.CenterPageFragment.nickname;
 import static com.example.kepa.kepasing.MainActivity.UserID;
 import static com.example.kepa.kepasing.MainActivity.client;
 import static com.example.kepa.kepasing.MainActivity.password;
-import static com.example.kepa.kepasing.mainpage.centerpage;
-import static com.example.kepa.kepasing.mainpage.transaction;
-
 
 public class profileedit extends TakePhotoActivity {
 
@@ -40,7 +39,6 @@ public class profileedit extends TakePhotoActivity {
     private TakePhoto takePhoto;
     private ImageView touxiang;
     private EditText password_label;
-    //private String nickname;
     private EditText nickname_label;
     private Uri imageUri;
     private File temp_file;
@@ -57,8 +55,8 @@ public class profileedit extends TakePhotoActivity {
         nickname_label = (EditText) findViewById(R.id.nickname);
         nickname_label.setText(nickname);
         password_label.setText(password);
-        temp_file=new File(getExternalCacheDir() + "/img/"+ UserID + ".png");//abd should be replaced by userID
-        recentTouxiang =new File(getExternalFilesDir("img") + "/user/" + UserID + ".png");//abd should be replaced by userID
+        temp_file=new File(getExternalCacheDir().toString() + "/img/"+ UserID + ".png");//abd should be replaced by userID
+        recentTouxiang =new File(getExternalFilesDir("img").toString() + "/user/" + UserID + ".png");//abd should be replaced by userID
 
         goback.setOnClickListener(new View.OnClickListener() {//左上角返回键
             @Override
@@ -74,10 +72,9 @@ public class profileedit extends TakePhotoActivity {
             touxiang.setImageResource(R.drawable.touxiang);
         }
         else {
-            ContentResolver resolver = getContentResolver();
             try {
-                imageUri = Uri.fromFile(recentTouxiang);
-                Bitmap bm = MediaStore.Images.Media.getBitmap(resolver, imageUri);
+                FileInputStream fis = new FileInputStream(recentTouxiang.toString());
+                Bitmap bm = BitmapFactory.decodeStream(fis);
                 touxiang.setImageBitmap(bm);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -90,7 +87,7 @@ public class profileedit extends TakePhotoActivity {
                 if (!temp_file.getParentFile().exists())temp_file.getParentFile().mkdirs();
                 imageUri = Uri.fromFile(temp_file);
                 CropOptions.Builder builder=new CropOptions.Builder().setAspectX(1).setAspectY(1);
-                CompressConfig compressConfig=new CompressConfig.Builder().setMaxSize(2*1024).setMaxPixel(800).create();
+                CompressConfig compressConfig=new CompressConfig.Builder().setMaxSize(1024).setMaxPixel(512).create();
                 takePhoto = getTakePhoto();
                 takePhoto.onEnableCompress(compressConfig,true);
                 takePhoto.onPickFromGalleryWithCrop(imageUri,builder.create());
@@ -189,13 +186,6 @@ public class profileedit extends TakePhotoActivity {
                     new Thread(runnable).start();
                     while(result == null){}
                     if(result.equals("success")){
-                        try {
-                            centerpage = CenterPageFragment.newInstance();
-                            transaction.replace(R.id.fragment_container, centerpage);
-                            transaction.commit();
-                        }catch(Exception e){
-                            System.out.println("Can not change center page");
-                        }
                         Toast.makeText(profileedit.this, "保存成功(●ˇ∀ˇ●)", Toast.LENGTH_SHORT).show();
                         onBackPressed();
                     }

@@ -1,9 +1,11 @@
 package com.example.kepa.kepasing;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,13 +16,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.Socket;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -71,6 +70,10 @@ public class singasong extends AppCompatActivity {
     private boolean upload_result = false;
     private boolean upload_end = false;
     private String datetime;
+    private boolean tipagain = false;
+    //playbutton
+    private int playorpause = 0;
+    private boolean startfist = true;
 
     public void setSong_id(String str){
         song_id = str;
@@ -84,6 +87,7 @@ public class singasong extends AppCompatActivity {
         song_id = mainpage.current_songid;
         System.out.println(song_id);
         file = new File(getExternalFilesDir(null)+"/song/"+song_id+MainActivity.UserID+".amr");
+//        file = new File(getExternalFilesDir(null)+"/song/"+song_id+MainActivity.UserID+".aac");
         mLrcView = (ILrcView)findViewById(R.id.lrcView);
         //add lyrics
         //改路径
@@ -114,8 +118,14 @@ public class singasong extends AppCompatActivity {
                     TrackPlayer=null;
 //                    newRecord.stopRecording();
                 }
+                if(mRecorder!=null)
+                {
+                    mRecorder.stop();
+                    mRecorder.release();
+                    //mRecorder = null;
+                }
                 BeginRecord();
-                StartButton.setText("REPLAY");
+                StartButton.setText("重录");
                 StopButton.setEnabled(true);
             }
         });
@@ -124,6 +134,7 @@ public class singasong extends AppCompatActivity {
         StopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 stopLrcPlay();
                 //Track
                 if(TrackPlayer!=null){
@@ -139,7 +150,6 @@ public class singasong extends AppCompatActivity {
                     System.out.println("release**********************");
 //                mRecorder = null;
                 }
-
                 Toast.makeText(singasong.this, "QwQ已保存本地录音~", Toast.LENGTH_SHORT).show();
                 StopButton.setEnabled(false);
             }
@@ -150,7 +160,19 @@ public class singasong extends AppCompatActivity {
         PlayButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PlayRecord();
+                playorpause += 1;
+                if(playorpause==1) {
+                    PlayRecord();
+                    PlayButton.setText("暂停");
+                }
+                else if(playorpause%2==0){
+                    if(recordPlayer!=null) recordPlayer.pause();
+                    PlayButton.setText("播放");
+                }
+                else{
+                    if(recordPlayer!=null) recordPlayer.start();
+                    PlayButton.setText("暂停");
+                }
             }
         });
 
@@ -161,8 +183,26 @@ public class singasong extends AppCompatActivity {
                 SimpleDateFormat formatter = new SimpleDateFormat ("yyyy-MM-dd HH:mm:ss");
                 Date curDate = new Date(System.currentTimeMillis());//获取当前时间
                 datetime = formatter.format(curDate);
-
                 new Thread(runnable).start();
+                while(!upload_end){}
+                //upload_end = false;
+                if(tipagain)
+                {
+                    tipagain = false;
+                    new AlertDialog.Builder(singasong.this)
+                            .setTitle("来自奇葩君的确认")
+                            .setMessage("您已经上传过这首歌咯，确定要覆盖吗？")
+                            .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    new Thread(uploadrunnable).start();
+                                    upload_result = true;
+                                }
+                            })
+                            .setNegativeButton("否", null)
+                            .show();
+
+                }
                 while(!upload_end){}
                 upload_end = false;
                 if(!upload_result) Toast.makeText(singasong.this, "QAQ上传失败……", Toast.LENGTH_SHORT).show();
@@ -234,17 +274,26 @@ public class singasong extends AppCompatActivity {
             e.printStackTrace();
         }
         try{
-            mRecorder = new MediaRecorder();
+            if(startfist) {
+                mRecorder = new MediaRecorder();
+                startfist = false;
+            }
             mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mRecorder.setOutputFormat(MediaRecorder.OutputFormat.AMR_NB);
             mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
+//            mRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
+//            mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
             File dir = new File(getExternalFilesDir(null)+"/song");
             boolean result;
             if(!dir.exists()) {
                 result = dir.mkdirs();
                 if(result) System.out.println("成功创建文件夹");
                 else System.out.println("创建文件夹失败");
+            }
+            if(file.exists()){
+                System.out.println("文件存在 删除");
+                file.delete();
             }
 
             mRecorder.setOutputFile(file.getAbsolutePath());
@@ -286,6 +335,8 @@ public class singasong extends AppCompatActivity {
                         recordPlayer.release();
                         recordPlayer = null;
                     }
+                    PlayButton.setText("重播");
+                    playorpause = 0;
                 }
             });
         } catch (Exception e) {
@@ -349,16 +400,15 @@ public class singasong extends AppCompatActivity {
                 FromServer = MainActivity.client.sendString(BuildJson());
                 Log.i("client", FromServer);
                 upload_result = ParseJson(FromServer,1);
-                if(upload_result == false){
+                if(!upload_result){
                     System.out.println("send message failed");
                     upload_end = true;
                 }
                 else
                 {
                     try{
-//
-                        //File soundfile = new File(getExternalFilesDir(null)+"/sound.amr");
                         MainActivity.client.sendFile(file.getAbsolutePath());
+                        System.out.println();
                         upload_end = true;
                     }catch(Exception e){
                         e.printStackTrace();
@@ -408,6 +458,58 @@ public class singasong extends AppCompatActivity {
 
         return inf.toString();
     }
+    private String upload2() throws JSONException {
+        JSONObject inf;
+        inf = new JSONObject();
+
+        try {
+            //inf.put("number", );
+            JSONArray array = new JSONArray();
+            JSONObject arr2 = new JSONObject();
+            arr2.put("type", "upload2");
+            arr2.put("song_ID", song_id);
+            arr2.put("user_ID", MainActivity.UserID);
+            arr2.put("date", datetime);
+            System.out.println(arr2.toString());
+            array.put(arr2);
+
+            inf.put("kepa", array);
+            System.out.println(array.toString());
+            System.out.println(inf.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        System.out.println("\n最终构造的JSON数据格式：");
+        System.out.println(inf.toString());
+
+        return inf.toString();
+    }
+
+    Runnable uploadrunnable= new Runnable() {
+        @Override
+        public void run() {
+            Log.i("client", "wozhendeyaojinqule");
+            upload_result = false;
+
+            try {
+                MainActivity.client.sendString(upload2());
+                try{
+                    MainActivity.client.sendFile(file.getAbsolutePath());
+                    System.out.println("传输歌曲文件");
+                    upload_end = true;
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+                Log.i("client", "success");
+            } catch (JSONException e) {
+                System.out.println("build json failed");
+                e.printStackTrace();
+            }
+            Log.i("client", "wotmyijingchulaile");
+
+//                FileTransferClient upload  = new FileTransferClient(file);
+        }
+    };
 
     public boolean ParseJson(String jsonString,int i) throws JSONException,
             ParseException {
@@ -425,7 +527,7 @@ public class singasong extends AppCompatActivity {
                 }
                 else
                 {
-                    Toast.makeText(singasong.this, "已上传过同样的歌哟！会覆盖哟！", Toast.LENGTH_SHORT).show();
+                    tipagain = true;
                 }
             }
             System.out.println(count);

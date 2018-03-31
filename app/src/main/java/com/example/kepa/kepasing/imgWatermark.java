@@ -84,9 +84,12 @@ public class imgWatermark{
                         int src_pixel = src.getPixel(col, row);// ARGB
                         int wm_pixel = watermark.getPixel(col,row);
                         float f_alpha = ((float)(Color.alpha(wm_pixel)))/255;
-                        int red = (Color.red(src_pixel) >> 2 << 2) + ((int)(Color.red(wm_pixel)* f_alpha)>>6); // same as (pixel >> 16) &0xff
-                        int green = (Color.green(src_pixel) >> 2 << 2) + ((int)(Color.green(wm_pixel)* f_alpha)>>6);// same as (pixel >> 8) &0xff
-                        int blue = (Color.blue(src_pixel) >> 2 << 2) + ((int)(Color.blue(wm_pixel)* f_alpha)>>6); // same as (pixel & 0xff)
+                        int red = (Color.red(src_pixel) >> 2 << 2) + ((int)(Color.red(wm_pixel)* f_alpha)>>6);
+                        // same as (pixel >> 16) &0xff
+                        int green = (Color.green(src_pixel) >> 2 << 2) + ((int)(Color.green(wm_pixel)* f_alpha)>>6);
+                        // same as (pixel >> 8) &0xff
+                        int blue = (Color.blue(src_pixel) >> 2 << 2) + ((int)(Color.blue(wm_pixel)* f_alpha)>>6);
+                        // same as (pixel & 0xff)
                         int alpha = 255; // same as (pixel >>> 24)
                         newb.setPixel(col, row, Color.argb(alpha, red, green, blue));
                     }
@@ -110,34 +113,6 @@ public class imgWatermark{
         }
         return;
     }
-
-    /*private Bitmap GetBitmap(String url)
-    {
-        Bitmap bitmap = null;
-        InputStream in = null;
-        BufferedOutputStream out = null;
-        try
-        {
-            System.out.print(url);
-            in = new BufferedInputStream(new URL.fromFile(url).openStream(), 50*1024);
-            final ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
-            out = new BufferedOutputStream(dataStream, 50*1024);
-            int ch=0;
-            while((ch=(in.read()))!=-1){
-                out.write(ch);
-            }
-            out.flush();
-            byte[] data = dataStream.toByteArray();
-            bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-            data = null;
-            return bitmap;
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            return null;
-        }
-    }*/
 
     private void saveBitmapToPNG(Bitmap bitmap, File file) throws IOException {
         Bitmap newBitmap = Bitmap.createBitmap(bitmap.getWidth(),

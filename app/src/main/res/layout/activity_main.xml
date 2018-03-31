@@ -114,5 +114,6 @@
             android:textColor="@color/colorAccent"
             android:onClick="signup"/>
     </LinearLayout>
+
 </LinearLayout>
 

@@ -4,8 +4,11 @@
     <color name="colorPrimaryDark">#4FB3A4</color>
     <color name="colorAccent">#FF7073</color>
     <color name="CommonGray">#7C8489</color>
-    <color name="White">#FFFFFF</color>
     <color name="LightGray">#CCCCCC</color>
-    <color name = "colorSpringOrange">#F5B977</color>
-    <color name = "colorSpringYellow">#FDFC7F</color>
+    <color name="White">#FFFFFF</color>
+    <color name="colorSpringGray">#7C8489</color>
+    <color name="colorSpringGreen">#4FB3A4</color>
+    <color name="colorSpringRed">#FF7073</color>
+    <color name="colorSpringOrange">#F5B977</color>
+    <color name="colorSpringYellow">#FDFC7F</color>
 </resources>

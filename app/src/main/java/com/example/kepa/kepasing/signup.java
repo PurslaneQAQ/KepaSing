@@ -35,8 +35,6 @@ import static com.example.kepa.kepasing.MainActivity.client;
 import static com.example.kepa.kepasing.MainActivity.password;
 
 public class signup extends TakePhotoActivity {
-    //private Client client;
-    //private String UserID;
     private String FromServer;
 
     private ImageView addicon;
@@ -114,8 +112,7 @@ public class signup extends TakePhotoActivity {
                 email = email_label.getText().toString();
                 nickname = nickname_label.getText().toString();
                 password = password_label.getText().toString();
-                //if (email.length() < 5 || email.indexOf("@")<=0 || email.indexOf(".") <=0) {
-                if (email.length() < 5 || email.indexOf(".") <=0) {
+                if (email.length() < 5 || email.indexOf("@")<=0 || email.indexOf(".") <=0) {
                     Toast.makeText(signup.this, "请输入正确的邮箱！", Toast.LENGTH_SHORT).show();
                 }
                 else if (nickname.length()  < 1) {
@@ -131,7 +128,7 @@ public class signup extends TakePhotoActivity {
                     new Thread(runnable).start();
                     while (result == null){}
                     if(result.equals("true")){
-                        Toast.makeText(signup.this, "注册成功！奇葩君欢迎你的加入(●ˇ∀ˇ●)", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(signup.this, "注册成功！奇葩君欢迎你的加入并向你赠送200K币！(●ˇ∀ˇ●)", Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(v.getContext(), mainpage.class);
                         startActivity(intent);
                     }
@@ -158,7 +155,7 @@ public class signup extends TakePhotoActivity {
                     recentTouxiang.getParentFile().mkdirs();
                 imageUri = Uri.fromFile(recentTouxiang);
                 CropOptions.Builder builder=new CropOptions.Builder().setAspectX(1).setAspectY(1);
-                CompressConfig compressConfig=new CompressConfig.Builder().setMaxSize(2 * 1024).setMaxPixel(200).create();
+                CompressConfig compressConfig=new CompressConfig.Builder().setMaxSize(1024).setMaxPixel(512).create();
                 takePhoto = getTakePhoto();
                 takePhoto.onPickFromGalleryWithCrop(imageUri,builder.create());
                 takePhoto.onEnableCompress(compressConfig,true);

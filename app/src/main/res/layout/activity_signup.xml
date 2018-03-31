@@ -48,7 +48,6 @@
         android:focusableInTouchMode="true"
         android:layout_marginTop="20dp">
         <TextView
-
             android:id="@+id/nickname_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -65,7 +64,7 @@
             android:textSize="15dp"
             android:theme="@style/login_underline"
             android:layout_marginTop="5dp"
-            android:inputType="textLongMessage" />
+            android:inputType="text"/>
     </RelativeLayout>
 
     <RelativeLayout
@@ -133,7 +132,5 @@
         android:textSize="13dp"
         android:background="@drawable/signupbuttonstyle"
         android:textColor="@color/White" />
-
-
 
 </LinearLayout>

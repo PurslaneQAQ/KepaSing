@@ -11,5 +11,4 @@ public interface ILrcView {
     void setLrc(List<LrcRow> lrcRows);
     void seekLrcToTime(long time);
     void setListener(ILrcViewListener l);
-
 }

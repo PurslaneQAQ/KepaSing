@@ -1,5 +1,6 @@
 package com.example.kepa.kepasing;
 
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.res.AssetManager;
@@ -11,7 +12,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -28,6 +31,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.example.kepa.kepasing.MainActivity.UserID;
 import static com.example.kepa.kepasing.MainActivity.client;
@@ -46,11 +51,15 @@ public class havesongs extends AppCompatActivity {
             "Love the Way You Lie","My Songs Know What You Did In the Dark","Castle"
     };*/
     String[] singername=null;
-            /*new String[]{
-            "Lana Del Rey","Adele","Avril Lavigne","Britney Spears","Bruno Mars","Emeli Sandé","Eminem ft. Rihanna",
-            "Fall Out Boy","Halsey"
-    };*/
-    boolean finished = false;
+    /*new String[]{
+    "Lana Del Rey","Adele","Avril Lavigne","Britney Spears","Bruno Mars","Emeli Sandé","Eminem ft. Rihanna",
+    "Fall Out Boy","Halsey"
+};*/
+    private boolean finished = false;
+    private boolean getfos = false;
+
+    private ProgressDialog progressDialog;
+    private Timer downloadtimer;
 
 
     @Override
@@ -119,40 +128,6 @@ public class havesongs extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                /*try {
-                    songid = new String[1];
-                    songnames = new String[1];
-                    singername = new String[1];
-
-                        songid[0] = "s0001";
-                        JSONObject inf;
-                        inf = new JSONObject();
-                        try {
-                            JSONArray array = new JSONArray();
-                            JSONObject arr2 = new JSONObject();
-                            arr2.put("type", "song_info");
-                            arr2.put("song_ID",songid[0]);
-                            System.out.println(arr2.toString());
-                            array.put(arr2);
-                            inf.put("kepa", array);
-                            System.out.println(array.toString());
-                            System.out.println(inf.toString());
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                        System.out.println("\n最终构造的JSON数据格式：");
-                        System.out.println(inf.toString());
-                        FromServer = client.sendString(inf.toString());
-                        Log.i("client", FromServer);
-                        ParseName(FromServer, 0);
-                } catch (JSONException e) {
-                    System.out.println("build json failed");
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                } catch (Exception e){
-                    e.printStackTrace();
-                }*/
                 finished = true;
 
                 //FileTransferClient upload  = new FileTransferClient(recentTouxiang);
@@ -168,10 +143,61 @@ public class havesongs extends AppCompatActivity {
             map.put("ItemImage",getBitmap(i));
             map.put("ItemTitle",songnames[i]);
             map.put("ItemText",singername[i]);
+            map.put("button","K 歌");
             listItem.add(map);
+            SimpleAdapter simpleAdapter=new SimpleAdapter(
+                    this,
+                    listItem,
+                    R.layout.item_asong,
+                    new String[]{"ItemImage","ItemTitle","ItemText","button"},
+                    new int[]{R.id.ItemImage,R.id.ItemTitle,R.id.ItemText,R.id.button})
+            {
 
-            SimpleAdapter simpleAdapter=new SimpleAdapter(this,listItem,R.layout.item_asong,
-                    new String[]{"ItemImage","ItemTitle","ItemText"},new int[]{R.id.ItemImage,R.id.ItemTitle,R.id.ItemText});
+                @Override
+                public View getView(final int position, View convertView,ViewGroup parent) {
+                    final View view=super.getView(position, convertView, parent);
+                    Button button=(Button)view.findViewById(R.id.button);
+                    button.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            TextView tv=(TextView)view.findViewById(R.id.ItemTitle);
+                            final ArrayList<String> songname=new ArrayList<String>();
+                            songname.add(tv.getText().toString());
+                            getfos = false;
+                            GoForSingPage newintent = new GoForSingPage(position);
+                            while (getfos){}
+                            newintent.start();
+
+                            File file = new File(getExternalCacheDir()+"/img/"+songid[position]+".png");
+                            File newfile = new File(getExternalFilesDir(null)+"/img/"+songid[position]+".png");
+                            if(file.exists())
+                                file.renameTo(newfile);
+                            mainpage.current_songid = songid[position];
+                            while(!getfos){}
+                            TextView new_tv= (TextView)view.findViewById(R.id.ItemTitle);
+                            final ArrayList<String> this_songname=new ArrayList<String>();
+                            this_songname.add(tv.getText().toString());
+                            if(downloadtimer!=null){
+                                System.out.println("****************settimer==null************");
+                                downloadtimer.cancel();
+                                downloadtimer = null;
+                            }
+                            if(progressDialog!=null)
+                            {
+                                System.out.println("****************setprogress==null*************");
+                                progressDialog.cancel();
+                                progressDialog = null;
+                            }
+                            System.out.println("set getfos false");
+
+                            Intent intent=new Intent(v.getContext(),singasong.class);
+                            intent.putStringArrayListExtra("Songinfos",this_songname);
+                            startActivity(intent);
+                        }
+                    });
+                    return view;
+                }
+            };
             simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
                 @Override
                 public boolean setViewValue(View view, Object data, String textRepresentation) {
@@ -186,18 +212,18 @@ public class havesongs extends AppCompatActivity {
                 }
             });
             lv.setAdapter(simpleAdapter);
-            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    TextView tv=(TextView)view.findViewById(R.id.ItemTitle);
-                    final ArrayList<String> songname=new ArrayList<String>();
-                    songname.add(tv.getText().toString());
-                    Intent intent=new Intent(parent.getContext(),singasong.class);
-                    intent.putStringArrayListExtra("Songinfos",songname);
-                    GoForSingPage newintent = new GoForSingPage(position);
-                    newintent.start();
-                }
-            });
+            lv.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+//            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//                @Override
+//                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                    TextView tv=(TextView)view.findViewById(R.id.ItemTitle);
+//                    final ArrayList<String> songname=new ArrayList<String>();
+//                    songname.add(tv.getText().toString());
+//                    Intent intent=new Intent(parent.getContext(),singasong.class);
+//                    intent.putStringArrayListExtra("Songinfos",songname);
+//                    startActivity(intent);
+//                }
+//            });
         }
     }
     //图片转bitmap
@@ -238,7 +264,6 @@ public class havesongs extends AppCompatActivity {
             singername[i] = ja.getJSONObject(0).getString("singer");
         }
     }
-
     class GoForSingPage extends Thread{
         private int position;
         public GoForSingPage(int position){
@@ -260,23 +285,22 @@ public class havesongs extends AppCompatActivity {
                     MainActivity.client.getFile(BuildJson_GoForSingPage(2,songid[position]),getExternalFilesDir(null).toString()+"/mp3");
                 }
                 System.out.println("getfile"+songid[position]+"mp3");
-//                Log.i("client", FromServer);
-//                ParseJson(FromServer);
-//                Log.i("client", "success");
+                getfos = true;
+                //                Log.i("client", FromServer);
+                //                ParseJson(FromServer);
+                //                Log.i("client", "success");
             } catch (JSONException e) {
                 System.out.println("build json failed");
                 e.printStackTrace();
             }
             Log.i("client", "wotmyijingchulaile");
-//                FileTransferClient upload  = new FileTransferClient(file);
+            //                FileTransferClient upload  = new FileTransferClient(file);
         }
     }
-
     private String BuildJson_GoForSingPage(int i, String song_id) throws JSONException {
 
         JSONObject inf;
         inf = new JSONObject();
-
         try {
             //inf.put("number", );
             JSONArray array = new JSONArray();
@@ -296,7 +320,6 @@ public class havesongs extends AppCompatActivity {
                 System.out.println(arr2.toString());
                 array.put(arr2);
             }
-
             inf.put("kepa", array);
             System.out.println(array.toString());
             System.out.println(inf.toString());
@@ -308,30 +331,4 @@ public class havesongs extends AppCompatActivity {
 
         return inf.toString();
     }
-    private String BuildJson(String song_id) throws JSONException {
-
-        JSONObject inf;
-        inf = new JSONObject();
-
-        try {
-            JSONArray array = new JSONArray();
-
-            JSONObject arr2 = new JSONObject();
-            arr2.put("type", "picture_song");
-            arr2.put("song_ID", song_id);
-            System.out.println(arr2.toString());
-            array.put(arr2);
-
-            inf.put("kepa", array);
-            System.out.println(array.toString());
-            System.out.println(inf.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        System.out.println("\n最终构造的JSON数据格式：");
-        System.out.println(inf.toString());
-
-        return inf.toString();
-    }
-
 }

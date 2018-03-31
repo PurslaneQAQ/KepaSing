@@ -47,26 +47,16 @@ public class SingerAdapter extends RecyclerView.Adapter<SingerAdapter.SingersVie
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            Intent intent=new Intent(v.getContext(),asingerssong.class);
-            final ArrayList<String> SingerOrder=new ArrayList<String>();
-            SingerOrder.add(singer.getName());
+                Intent intent=new Intent(v.getContext(),asingerssong.class);
+                final ArrayList<String> SingerOrder=new ArrayList<String>();
+                SingerOrder.add(holder.tvName.getText().toString());
                 SingerOrder.add(singer.getID());
-            intent.putStringArrayListExtra("Singerinfos",SingerOrder);
-            v.getContext().startActivity(intent);
+                intent.putStringArrayListExtra("Singerinfos",SingerOrder);
+                v.getContext().startActivity(intent);
             }
         });
 
         final RecyclerView.ViewHolder vh=(RecyclerView.ViewHolder)holder;
-
-        //如果设置了回调，就设置点击事件
-        /*if (mOnItemClickListener != null){
-            vh.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mOnItemClickListener.onItemClick(vh.itemView,position);
-                }
-            });
-        }*/
     }
 
     @Override

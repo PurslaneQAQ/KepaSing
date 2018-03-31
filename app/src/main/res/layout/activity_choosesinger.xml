@@ -47,6 +47,6 @@
             app:sidebar_text_color="#8D6E63"
             app:sidebar_text_size="14sp"
             app:sidebar_text_alignment="center"/>
-
     </RelativeLayout>
+
 </LinearLayout>

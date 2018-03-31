@@ -25,4 +25,5 @@
             android:textSize="18dp"
             android:textColor="@color/White"/>
     </RelativeLayout>
+
 </LinearLayout>

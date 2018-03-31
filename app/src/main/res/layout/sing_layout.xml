@@ -24,7 +24,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/White"
-        android:queryHint="输入歌手/歌名"/>
+        android:queryHint="输入歌名"/>
     <RelativeLayout
         android:id="@+id/buttonspace"
         android:layout_below="@id/search_bar"
@@ -78,4 +78,5 @@
             android:layout_height="match_parent">
         </ListView>
     </RelativeLayout>
+
 </RelativeLayout>

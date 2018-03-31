@@ -27,4 +27,5 @@
         android:textSize="10sp"
         android:textColor="@color/colorAccent"
         android:id="@+id/ItemScore"/>
+
 </RelativeLayout>

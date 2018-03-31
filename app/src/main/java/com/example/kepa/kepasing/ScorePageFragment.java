@@ -1,7 +1,6 @@
 package com.example.kepa.kepasing;
 
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -11,7 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -93,9 +92,55 @@ public class ScorePageFragment extends Fragment {
             map.put("ItemImage",getBitmap(i));
             map.put("ItemTitle",scored_song_names[i]);
             map.put("ItemText",scored_user_nicknames[i]);
+            map.put("button","评 分");
             listItem.add(map);
-            SimpleAdapter simpleAdapter=new SimpleAdapter(getContext(),listItem,R.layout.item_asong,
-                    new String[]{"ItemImage","ItemTitle","ItemText"},new int[]{R.id.ItemImage,R.id.ItemTitle,R.id.ItemText});
+            SimpleAdapter simpleAdapter=new SimpleAdapter(
+                    getContext(),
+                    listItem,
+                    R.layout.item_asong,
+                    new String[]{"ItemImage","ItemTitle","ItemText","button"},
+                    new int[]{R.id.ItemImage,R.id.ItemTitle,R.id.ItemText,R.id.button})
+            {
+
+                @Override
+                public View getView(int position, final View convertView, ViewGroup parent) {
+                    final View view=super.getView(position, convertView, parent);
+                    Button button=(Button)view.findViewById(R.id.button);
+                    final int now_position = position;
+                    button.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            //zyt
+                            ScorePageFragment.GoForScorePage newintent = new ScorePageFragment.GoForScorePage(now_position);
+                            newintent.start();
+
+                            TextView tv=(TextView)view.findViewById(R.id.ItemTitle);
+                            TextView tv1=(TextView)view.findViewById(R.id.ItemText);
+                            final ArrayList<String> songinfo=new ArrayList<String>();
+
+                            //zyt
+                            mainpage.current_position = now_position;
+                            mainpage.current_scoredid = scored_ids[now_position];
+                            mainpage.current_judgeuserid = scored_user_ids[now_position];
+                            mainpage.current_score = scored_scores[now_position];
+
+                            songinfo.add(tv.getText().toString());
+                            songinfo.add(tv1.getText().toString());
+
+                            //zyt
+                            while(!getfos){}
+                            System.out.println("set getfos fault in click score");
+                            getfos = false;
+
+                            Intent intent=new Intent(view.getContext(),scoreasong.class);
+                            intent.putStringArrayListExtra("Songinfos",songinfo);
+                            startActivity(intent);
+
+                        }
+                    });
+                    return view;
+                }
+            };
             simpleAdapter.setViewBinder(new SimpleAdapter.ViewBinder() {
                 @Override
                 public boolean setViewValue(View view, Object data, String textRepresentation) {
@@ -110,40 +155,41 @@ public class ScorePageFragment extends Fragment {
                 }
             });
             lv.setAdapter(simpleAdapter);
-            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    //zyt
-                    ScorePageFragment.GoForScorePage newintent = new ScorePageFragment.GoForScorePage(position);
-                    newintent.start();
-
-                    TextView tv=(TextView)view.findViewById(R.id.ItemTitle);
-                    TextView tv1=(TextView)view.findViewById(R.id.ItemText);
-                    final ArrayList<String> songinfo=new ArrayList<String>();
-
-                    //zyt
-                    mainpage.current_position = position;
-                    mainpage.current_scoredid = scored_ids[position];
-                    mainpage.current_judgeuserid = scored_user_ids[position];
-                    mainpage.current_score = scored_scores[position];
-
-                    songinfo.add(tv.getText().toString());
-                    songinfo.add(tv1.getText().toString());
-
-                    //zyt
-                    while(!getfos){}
-                    System.out.println("set getfos fault in click score");
-                    getfos = false;
-
-                    Intent intent=new Intent(parent.getContext(),scoreasong.class);
-                    intent.putStringArrayListExtra("Songinfos",songinfo);
-                    startActivity(intent);
-
+            lv.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
+//            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//                @Override
+//                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 //                    //zyt
-//                    while(scoreasong.submit_score==0){}
-//                    scored_scores[position] = scoreasong.submit_score;
-                }
-            });
+//                    ScorePageFragment.GoForScorePage newintent = new ScorePageFragment.GoForScorePage(position);
+//                    newintent.start();
+//
+//                    TextView tv=(TextView)view.findViewById(R.id.ItemTitle);
+//                    TextView tv1=(TextView)view.findViewById(R.id.ItemText);
+//                    final ArrayList<String> songinfo=new ArrayList<String>();
+//
+//                    //zyt
+//                    mainpage.current_position = position;
+//                    mainpage.current_scoredid = scored_ids[position];
+//                    mainpage.current_judgeuserid = scored_user_ids[position];
+//                    mainpage.current_score = scored_scores[position];
+//
+//                    songinfo.add(tv.getText().toString());
+//                    songinfo.add(tv1.getText().toString());
+//
+//                    //zyt
+//                    while(!getfos){}
+//                    System.out.println("set getfos fault in click score");
+//                    getfos = false;
+//
+//                    Intent intent=new Intent(parent.getContext(),scoreasong.class);
+//                    intent.putStringArrayListExtra("Songinfos",songinfo);
+//                    startActivity(intent);
+//
+////                    //zyt
+////                    while(scoreasong.submit_score==0){}
+////                    scored_scores[position] = scoreasong.submit_score;
+//                }
+//            });
             First_Come = false;
         }
         return view;
@@ -163,7 +209,7 @@ public class ScorePageFragment extends Fragment {
 
                 for(int i = 0; i<count;i++)
                 {
-                    File file = new File(getContext().getExternalCacheDir()+"/img/"+scored_user_ids[i]+".jpg");
+                    File file = new File(getContext().getExternalCacheDir()+"/img/"+scored_user_ids[i]+".png");
                     if(!file.exists())
                     {
                         MainActivity.client.getFile(BuildJson(1,scored_user_ids[i]),getContext().getExternalCacheDir().toString()+"/img");
@@ -192,10 +238,10 @@ public class ScorePageFragment extends Fragment {
         public void run(){
             Log.i("client", "wozhendeyaojinqule");
             try {
-                File file = new File(getContext().getExternalCacheDir().toString()+"/mp3/"+scored_ids[position]+".mp3");
+                File file = new File(getContext().getExternalCacheDir().toString()+"/amr/"+scored_ids[position]+".amr");
                 if(!file.exists())
                 {
-                    MainActivity.client.getFile(BuildJson_GoForSingPage(scored_ids[position]),getContext().getExternalCacheDir().toString()+"/mp3");
+                    MainActivity.client.getFile(BuildJson_GoForSingPage(scored_ids[position]),getContext().getExternalCacheDir().toString()+"/amr");
                 }
                 System.out.println("getfile"+scored_ids[position]);
             } catch (JSONException e) {
@@ -309,7 +355,7 @@ public class ScorePageFragment extends Fragment {
         int j = 0;
         for(int i =0;i<count;i++)
         {
-            if(ja.getJSONObject(i+1).getString("user_ID")!=MainActivity.UserID)
+            if(!ja.getJSONObject(i+1).getString("user_ID").equals(MainActivity.UserID))
             {
                 scored_ids[j] = ja.getJSONObject(i+1).getString("scored_ID");
                 scored_user_ids[j] = ja.getJSONObject(i+1).getString("user_ID");

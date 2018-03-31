@@ -1,6 +1,5 @@
 package com.example.kepa.kepasing;
 
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 
@@ -9,7 +8,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
@@ -26,10 +24,7 @@ public class mainpage extends AppCompatActivity {
     private MainPageFragment mainpage;
     private SingPageFragment singpage;
     private ScorePageFragment scorepage;
-    public static CenterPageFragment centerpage;
-
-    //zyr
-    public static FragmentTransaction transaction;
+    private CenterPageFragment centerpage;
 
     //zyt
     private boolean First_Come = true;
@@ -37,6 +32,7 @@ public class mainpage extends AppCompatActivity {
     private String[] new_songnames;
     private String[] new_songids;
     private String[] new_singers;
+
     private String[] rank_scoredids;
     private String[] rank_songnames;
     private String[] rank_userids;
@@ -54,16 +50,13 @@ public class mainpage extends AppCompatActivity {
     public static int top_count;
     public static int hot_count;
     public static boolean getmessages=false;
+    public static int processdownload  = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mainpage);
         mFrameLayout=(FrameLayout)findViewById(R.id.fragment_container);
-
-        //zyr
-        FragmentManager fm = (new AppCompatActivity()).getSupportFragmentManager();
-        FragmentTransaction transaction = fm.beginTransaction();
 
         //zyt
         System.out.println("First_come"+First_Come);
@@ -90,7 +83,8 @@ public class mainpage extends AppCompatActivity {
         bottomNavigation.addItem(item3);
         bottomNavigation.addItem(item4);
         bottomNavigation.setDefaultBackgroundColor(Color.parseColor("#FEFEFE"));
-        bottomNavigation.setAccentColor(Color.parseColor("#4FB3A4"));
+        int accentcolor=getResources().getColor(R.color.colorPrimary);
+        bottomNavigation.setAccentColor(accentcolor);
         bottomNavigation.setTitleTextSize(30,28);
         bottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW);
         bottomNavigation.setBehaviorTranslationEnabled(false);
@@ -215,6 +209,14 @@ public class mainpage extends AppCompatActivity {
     public String[] getHot_songids(){
         return hot_songids;
     }
+//
+//    public boolean[] getHot_buy(){
+//        return hot_buy;
+//    }
+//
+//    public boolean[] getNew_buy(){
+//        return new_buy;
+//    }
 
 
     //json zyt
@@ -228,6 +230,7 @@ public class mainpage extends AppCompatActivity {
             JSONObject arr2 = new JSONObject();
             if (i == 0){
                 arr2.put("type", "new_song");
+//                arr2.put("user_ID",MainActivity.UserID);
                 System.out.println(arr2.toString());
             }
             if(i==1) {
@@ -236,6 +239,7 @@ public class mainpage extends AppCompatActivity {
             }
             if(i==2) {
                 arr2.put("type", "hot");
+//                arr2.put("user_ID",MainActivity.UserID);
                 System.out.println(arr2.toString());
             }
             array.put(arr2);
@@ -277,6 +281,7 @@ public class mainpage extends AppCompatActivity {
                 new_songids[i] = ja.getJSONObject(i+1).getString("song_ID");
                 new_songnames[i] = ja.getJSONObject(i+1).getString("song_name");
                 new_singers[i] = ja.getJSONObject(i+1).getString("singer");
+
 //                System.out.println(new_songids[i]+new_songnames[i]+new_singers[i]+i);
             }
         }
@@ -297,7 +302,7 @@ public class mainpage extends AppCompatActivity {
             int j = 0;
             for(int i =0;i<count;i++)
             {
-                if(ja.getJSONObject(i+1).getString("user_ID")!=MainActivity.UserID) {
+                if(!ja.getJSONObject(i+1).getString("user_ID").equals(MainActivity.UserID)) {
                     rank_scoredids[j] = ja.getJSONObject(i + 1).getString("scored_ID");
                     rank_songnames[j] = ja.getJSONObject(i + 1).getString("song_name");
                     rank_userids[j] = ja.getJSONObject(i + 1).getString("user_ID");
@@ -324,6 +329,7 @@ public class mainpage extends AppCompatActivity {
                 hot_songids[i] = ja.getJSONObject(i+1).getString("song_ID");
                 hot_songnames[i] = ja.getJSONObject(i+1).getString("song_name");
                 hot_singers[i] = ja.getJSONObject(i+1).getString("singer");
+
 //                System.out.println(hot_songids[i]+hot_songnames[i]+hot_singers[i]+i);
             }
         }

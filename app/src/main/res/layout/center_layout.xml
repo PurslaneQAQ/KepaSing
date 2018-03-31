@@ -17,14 +17,14 @@
             android:textSize="18dp"
             android:textColor="@color/White"/>
         <TextView
-            android:id="@+id/profileedit"
+            android:id="@+id/setup"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:text="编辑"
+            android:text="设置"
             android:textColor="@color/White"
             android:textAlignment="center"
-            android:paddingTop="10dp"
             android:layout_alignParentRight="true"
+            android:paddingTop="10dp"
             android:layout_centerVertical="true"
             android:layout_marginRight="10dp"/>
     </RelativeLayout>
@@ -145,4 +145,5 @@
             android:background="#90909090"
             android:layout_above="@id/player"/>
     </RelativeLayout>
+
 </LinearLayout>

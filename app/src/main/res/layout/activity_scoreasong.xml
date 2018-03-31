@@ -66,7 +66,7 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:id="@+id/play"
-                android:src="@drawable/pause"
+
                 android:layout_centerVertical="true"/>
             <android.support.v7.widget.AppCompatSeekBar
                 android:id="@+id/seekbar"
@@ -86,10 +86,16 @@
         android:layout_gravity="center"
         android:layout_marginTop="40dp"/>
     <TextView
+        android:id="@+id/dafenrenshu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:textSize="15sp"/>
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="5dp"
         android:textSize="20dp"
         android:id="@+id/score"/>
     <Button

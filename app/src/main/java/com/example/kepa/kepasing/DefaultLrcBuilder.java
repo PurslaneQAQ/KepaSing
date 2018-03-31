@@ -34,7 +34,7 @@ public class DefaultLrcBuilder implements ILrcBuilder {
                 line = br.readLine();
                 Log.d(TAG,"lrc raw line:"+line);
                 if(line!=null&&line.length()>0){
-                    //提取歌词时间和歌词内容
+                    //提取歌词时间和歌词的内容
                     List<LrcRow> lrcRows = LrcRow.createRows(line);
                     if(lrcRows!=null&&lrcRows.size()>0){
                         for(LrcRow row : lrcRows){

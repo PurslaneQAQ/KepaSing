@@ -4,14 +4,11 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PointF;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import com.example.kepa.kepasing.ILrcView;
 
 import java.util.List;
-import java.util.jar.Attributes;
 
 /**
  * Created by ASUS on 2017/10/26.
@@ -21,7 +18,7 @@ public class LyricView extends View implements ILrcView {
     private List<LrcRow> mLrcRows;
     private Paint mPaint;
     private String mLoadingLrcTip = "暂无歌词";
-    private int mHighlight = getResources().getColor(R.color.colorAccent);
+    private int mHighlight = getResources().getColor(R.color.colorSpringRed);
     private int mOrdinary = Color.WHITE;
     private int mLrcFontSize = 30;
     private int mHighlightFontSize = 35;

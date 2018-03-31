@@ -52,7 +52,6 @@ public class choosesinger extends AppCompatActivity {
             }
         });*/
 
-
         sideBar = (WaveSideBar) findViewById(R.id.side_bar);
         sideBar.setOnSelectIndexItemListener(new WaveSideBar.OnSelectIndexItemListener() {
             @Override
@@ -74,10 +73,9 @@ public class choosesinger extends AppCompatActivity {
 
     class MyComparator implements Comparator {
         public int compare(Object o1, Object o2) {
-            String i1 = ((Singer)o1).getIndex();
-            String i2 = ((Singer)o2).getIndex();
+            String i1 = ((Singer) o1).getIndex();
+            String i2 = ((Singer) o2).getIndex();
             return i1.compareTo(i2);
         }
     }
-
 }

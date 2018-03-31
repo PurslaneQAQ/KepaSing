@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.kepa.kepasing">
-    <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>  
-    <uses-permission android:name="android.permission.INTERNET"/>  
+    <uses-permission android:name = "android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name = "android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name = "android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name = "android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"></uses-permission>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -27,7 +29,8 @@
         <activity android:name=".havesongs" />
         <activity android:name=".asingerssong" />
         <activity android:name=".signup" />
-        <activity android:name=".searchresult"/>
+        <activity android:name=".setup" />
+        <activity android:name=".searchresult"></activity>
     </application>
 
 </manifest>

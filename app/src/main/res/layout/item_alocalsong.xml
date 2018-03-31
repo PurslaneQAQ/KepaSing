@@ -18,4 +18,5 @@
         android:layout_alignLeft="@id/ItemImage"
         android:layout_marginTop="5dp"
         android:textSize="12sp"/>
+
 </RelativeLayout>

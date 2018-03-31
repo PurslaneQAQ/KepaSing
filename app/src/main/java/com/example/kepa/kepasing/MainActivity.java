@@ -1,7 +1,6 @@
 package com.example.kepa.kepasing;
 
 import android.content.Intent;
-import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,10 +13,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,8 +23,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText email_label;
     public static String password;
     private EditText password_label;
-    private String result;
-    private String reason;
+    private String result = null;
+    private boolean finished = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,11 +32,6 @@ public class MainActivity extends AppCompatActivity {
         client = new Client();
         email_label = (EditText)findViewById(R.id.email);
         password_label = (EditText)findViewById(R.id.password);
-        /*StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
-
-                .detectDiskReads().detectDiskWrites().detectNetwork()
-
-                .penaltyLog().build());*/
 
     }
     Runnable runnable = new Runnable(){
@@ -72,28 +62,28 @@ public class MainActivity extends AppCompatActivity {
         else if(password.length() < 6)
             Toast.makeText(MainActivity.this, "咦，密码不大对吧QwQ", Toast.LENGTH_SHORT).show();
         else {
+            finished = false;
             new Thread(runnable).start();
-            while(result == null){}
+            while(!finished){}
             if (result.equals("true")) {
                 Intent intent = new Intent(MainActivity.this, mainpage.class);
                 startActivity(intent);
             }
             else {
-                if (reason != null) {
-                    if (reason.equals("fail1")) {
-                        Toast.makeText(MainActivity.this, "小主！还记得大明湖畔的夏雨荷吗？失忆啦，用户名错啦！", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(MainActivity.this, "妈诶手滑了吗，密码不对哟！", Toast.LENGTH_SHORT).show();
-                    }
+                if (result.equals("fail1")) {
+                    Toast.makeText(MainActivity.this, "小主！还记得大明湖畔的夏雨荷吗？失忆啦，用户名错啦！", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "妈诶手滑了吗，密码不对哟！", Toast.LENGTH_SHORT).show();
                 }
+                result = null;
             }
         }
+    }
 
         /******************for_try***********************
-        Intent intent=new Intent(this,mainpage.class);
-        startActivity(intent);
-        ************************************************/
-    }
+         Intent intent=new Intent(this,mainpage.class);
+         startActivity(intent);
+         ************************************************/
     /*注册按钮*/
     public void signup(View view){
         Intent intent = new Intent(this, signup.class);
@@ -138,11 +128,11 @@ public class MainActivity extends AppCompatActivity {
         if (ja.getJSONObject(0).getString("type").equals("login")) {
             result = ja.getJSONObject(0).getString("result");
             System.out.println(result);
+            finished = true;
             if (result.equals("true")) {
                 System.out.println(ja.getJSONObject(0).getString("user_ID"));
                 return ja.getJSONObject(0).getString("user_ID");
             } else {
-                reason = ja.getJSONObject(0).getString("result");
                 return null;
             }
         }
